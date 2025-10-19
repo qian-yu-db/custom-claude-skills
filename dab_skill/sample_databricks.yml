@@ -1,0 +1,82 @@
+bundle:
+  name: sample_etl_pipeline
+
+resources:
+  jobs:
+    sample_etl_pipeline_job:
+      name: sample_etl_pipeline_job
+      tasks:
+      # Stage 1: Data Ingestion (parallel)
+      - task_key: ingest_sales
+        python_wheel_task:
+          package_name: sample_etl_pipeline
+          entry_point: src.ingest_sales
+        new_cluster: &default_cluster
+          spark_version: 13.3.x-scala2.12
+          node_type_id: i3.xlarge
+          num_workers: 2
+
+      - task_key: ingest_inventory
+        python_wheel_task:
+          package_name: sample_etl_pipeline
+          entry_point: src.ingest_inventory
+        new_cluster: *default_cluster
+
+      # Stage 2: Data Validation (depends on ingestion)
+      - task_key: validate_sales
+        depends_on:
+        - task_key: ingest_sales
+        notebook_task:
+          notebook_path: ./notebooks/validate_sales.ipynb
+          source: WORKSPACE
+        new_cluster: *default_cluster
+
+      - task_key: validate_inventory
+        depends_on:
+        - task_key: ingest_inventory
+        notebook_task:
+          notebook_path: ./notebooks/validate_inventory.ipynb
+          source: WORKSPACE
+        new_cluster: *default_cluster
+
+      # Stage 3: Data Transformation (depends on validation)
+      - task_key: transform_data
+        depends_on:
+        - task_key: validate_sales
+        - task_key: validate_inventory
+        python_wheel_task:
+          package_name: sample_etl_pipeline
+          entry_point: src.transform_data
+        new_cluster: *default_cluster
+
+      # Stage 4: Load to Warehouse (depends on transformation)
+      - task_key: load_to_warehouse
+        depends_on:
+        - task_key: transform_data
+        python_wheel_task:
+          package_name: sample_etl_pipeline
+          entry_point: src.load_data
+        new_cluster: *default_cluster
+
+      # Stage 5: Generate Report (depends on load)
+      - task_key: generate_report
+        depends_on:
+        - task_key: load_to_warehouse
+        notebook_task:
+          notebook_path: ./notebooks/generate_report.ipynb
+          source: WORKSPACE
+        new_cluster: *default_cluster
+
+      max_concurrent_runs: 1
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: ${workspace.host}
+
+  prod:
+    mode: production
+    workspace:
+      host: ${workspace.host}
