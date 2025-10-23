@@ -6,7 +6,7 @@
 
 | File | Description |
 |------|-------------|
-| `databricks-asset-bundle.zip` | **Main skill package** - Upload this to Claude |
+| `databricks-asset-bundle/` | **Main skill package** - Add to .claude/skills/|
 | `USAGE_GUIDE.md` | Comprehensive usage examples and scenarios |
 | `QUICK_REFERENCE.md` | Quick reference card for common operations |
 | `SKILL_SUMMARY.md` | Complete overview of skill features and capabilities |
