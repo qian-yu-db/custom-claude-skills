@@ -57,6 +57,7 @@ Claude will generate:
 - **Simple RAG**: Retrieve → Generate (always retrieves)
 - **Tool-calling RAG**: LLM decides when to retrieve
 - **Multi-hop RAG**: Query decomposition → Multiple retrievals → Synthesis
+- **Self-query RAG**: LLM extracts filters from natural language queries
 
 ### Production Ready
 - Custom LangChain retriever
@@ -110,6 +111,33 @@ result = agent.invoke({
 })
 ```
 
+### Self-Query RAG Agent
+```python
+from langchain.chains.query_constructor.base import AttributeInfo
+
+# Define metadata fields for filtering
+metadata_field_info = [
+    AttributeInfo(name="source", description="Source document", type="string"),
+    AttributeInfo(name="category", description="Category (tutorial/guide/api)", type="string"),
+    AttributeInfo(name="date", description="Date (YYYY-MM-DD)", type="string")
+]
+
+# LLM automatically extracts filters from natural language
+agent = create_self_query_agent(
+    index_name="catalog.schema.docs_index",
+    endpoint_name="my_endpoint",
+    metadata_field_info=metadata_field_info
+)
+
+# Example: "Show me Python tutorials from after 2024-01-01"
+# → Automatically extracts: category='tutorial' AND date >= '2024-01-01'
+result = agent.invoke({
+    "messages": [HumanMessage("Show me Python tutorials from the user guide")],
+    "retrieved_documents": [],
+    "final_response": ""
+})
+```
+
 ## 📝 Architecture Patterns
 
 ### Pattern 1: Simple RAG
@@ -131,6 +159,13 @@ User Query → LLM Decision → Retrieve (if needed) → Generate → End
 User Query → Decompose → Retrieve for Q1 → Retrieve for Q2 → ... → Synthesize → End
 ```
 **Use when**: Complex questions need multiple retrievals
+
+### Pattern 4: Self-Query RAG
+```
+User Query → Extract Filters → Filtered Similarity Search → Generate → End
+              (via LLM)         (with metadata filters)
+```
+**Use when**: Need to filter by metadata (source, category, date, etc.)
 
 ## 🛠️ What Gets Created
 

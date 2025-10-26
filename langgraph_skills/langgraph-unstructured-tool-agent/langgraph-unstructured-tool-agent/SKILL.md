@@ -13,6 +13,8 @@ This skill should activate when the user requests:
 - "Create an agent that searches documents using embeddings"
 - "Build an unstructured retrieval agent with LangGraph"
 - "Integrate Vector Search index into my agent"
+- "Create a self-query retriever with metadata filtering"
+- "Build an agent that extracts filters from natural language queries"
 
 ## Core Capabilities
 
@@ -457,30 +459,161 @@ def hybrid_search(query: str, alpha: float = 0.5):
     return combined[:5]
 ```
 
-### Self-Querying Retriever
+### Pattern 4: Self-Query RAG Agent
+
+Agent that automatically extracts metadata filters from natural language queries using LangChain's self-query framework:
 
 ```python
-def self_query_node(state):
-    """Generate optimized search query from user question."""
+from langchain.chains.query_constructor.base import AttributeInfo
+from self_query_retriever import DatabricksSelfQueryRetriever
 
-    user_query = state["messages"][-1].content
+class SelfQueryRAGState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+    retrieved_documents: list
+    extracted_filters: Optional[Dict[str, Any]]
+    final_response: str
 
-    optimization_prompt = f"""
-    Convert this natural language question into an optimized search query:
+# Define metadata field information for the LLM
+metadata_field_info = [
+    AttributeInfo(
+        name="source",
+        description="The source document name (e.g., 'user_guide.pdf', 'api_reference.md')",
+        type="string"
+    ),
+    AttributeInfo(
+        name="category",
+        description="Document category: 'tutorial', 'reference', 'guide', or 'api'",
+        type="string"
+    ),
+    AttributeInfo(
+        name="page",
+        description="The page number in the document",
+        type="integer"
+    ),
+    AttributeInfo(
+        name="date",
+        description="Document creation date in YYYY-MM-DD format",
+        type="string"
+    ),
+    AttributeInfo(
+        name="language",
+        description="Programming language (e.g., 'python', 'sql', 'scala')",
+        type="string"
+    )
+]
 
-    Question: {user_query}
+# Create self-query retriever
+self_query_retriever = DatabricksSelfQueryRetriever.from_databricks(
+    index_name="catalog.schema.docs_index",
+    endpoint_name="vs_endpoint",
+    document_content_description="Technical documentation, tutorials, API references, and code examples",
+    metadata_field_info=metadata_field_info,
+    num_results=5,
+    verbose=True  # Show extracted filters
+)
 
-    Search Query (keywords and key phrases only):
+def self_query_retrieve_node(state: SelfQueryRAGState) -> SelfQueryRAGState:
     """
+    Use self-query retriever to extract filters from natural language.
 
-    optimized = llm.invoke(optimization_prompt)
-    search_query = optimized.content.strip()
+    Example queries:
+    - "Show me Python tutorials from the user guide"
+      → Extracts: category='tutorial', language='python', source contains 'user_guide'
+    - "Find API references created after 2024-01-01"
+      → Extracts: category='api', date >= '2024-01-01'
+    - "Get examples from page 10-20 of the guide"
+      → Extracts: page >= 10, page <= 20, source contains 'guide'
+    """
+    query = state["messages"][-1].content
 
-    # Use optimized query for retrieval
-    docs = retriever.get_relevant_documents(search_query)
+    # Self-query retriever automatically:
+    # 1. Sends query + metadata schema to LLM
+    # 2. LLM extracts semantic query + structured filters
+    # 3. Converts filters to Databricks Vector Search format
+    # 4. Executes filtered similarity search
+    docs = self_query_retriever.get_relevant_documents(query)
 
-    return {"retrieved_context": format_documents(docs)}
+    return {
+        "retrieved_documents": docs,
+        "extracted_filters": None  # Could extract from verbose output
+    }
+
+def generate_with_sources_node(state: SelfQueryRAGState) -> SelfQueryRAGState:
+    """Generate response with source attribution."""
+    query = state["messages"][-1].content
+    docs = state["retrieved_documents"]
+
+    if not docs:
+        return {
+            "messages": [AIMessage(content="No relevant documents found.")],
+            "final_response": "No results"
+        }
+
+    # Format context with metadata
+    context_parts = []
+    for i, doc in enumerate(docs, 1):
+        source = doc.metadata.get("source", "Unknown")
+        page = doc.metadata.get("page", "N/A")
+        category = doc.metadata.get("category", "N/A")
+
+        context_parts.append(
+            f"[Doc {i}] ({category}, {source}, page {page}):\n{doc.page_content}"
+        )
+
+    context = "\n\n".join(context_parts)
+
+    # Generate with source attribution
+    prompt = f"""Answer the question using the provided documents. Include source citations.
+
+Context:
+{context}
+
+Question: {query}
+
+Answer (with sources):"""
+
+    response = llm.invoke(prompt)
+
+    return {
+        "messages": [AIMessage(content=response.content)],
+        "final_response": response.content
+    }
+
+# Build graph
+graph = StateGraph(SelfQueryRAGState)
+graph.add_node("self_query_retrieve", self_query_retrieve_node)
+graph.add_node("generate_with_sources", generate_with_sources_node)
+
+graph.set_entry_point("self_query_retrieve")
+graph.add_edge("self_query_retrieve", "generate_with_sources")
+graph.add_edge("generate_with_sources", END)
+
+self_query_agent = graph.compile()
 ```
+
+**How Self-Query Works:**
+
+1. **User asks**: "Show me Python tutorials from the user guide created after 2024-01-01"
+
+2. **LLM extracts**:
+   - Semantic query: "Python tutorials"
+   - Filters: `category='tutorial' AND language='python' AND source LIKE '%user_guide%' AND date >= '2024-01-01'`
+
+3. **Converted to Databricks format**:
+```python
+{
+    "$and": [
+        {"category": {"$eq": "tutorial"}},
+        {"language": {"$eq": "python"}},
+        {"source": {"$like": "%user_guide%"}},
+        {"date": {"$gte": "2024-01-01"}}
+    ]
+}
+```
+
+4. **Vector Search executes**: Similarity search with filters applied
+
+5. **Returns**: Only relevant documents matching all criteria
 
 ### Response Grading
 

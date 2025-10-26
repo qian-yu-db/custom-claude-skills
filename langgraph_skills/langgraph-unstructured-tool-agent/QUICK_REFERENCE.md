@@ -295,6 +295,104 @@ graph.add_edge("synthesize", END)
 agent = graph.compile()
 ```
 
+### Pattern 4: Self-Query RAG
+```python
+from langchain.chains.query_constructor.base import AttributeInfo
+from self_query_retriever import DatabricksSelfQueryRetriever
+
+class SelfQueryState(TypedDict):
+    messages: Sequence[BaseMessage]
+    retrieved_documents: list
+    final_response: str
+
+# Define metadata fields for LLM
+metadata_field_info = [
+    AttributeInfo(
+        name="source",
+        description="Source document name (e.g., 'user_guide.pdf')",
+        type="string"
+    ),
+    AttributeInfo(
+        name="category",
+        description="Category: 'tutorial', 'reference', 'guide', 'api'",
+        type="string"
+    ),
+    AttributeInfo(
+        name="page",
+        description="Page number in document",
+        type="integer"
+    ),
+    AttributeInfo(
+        name="date",
+        description="Creation date (YYYY-MM-DD)",
+        type="string"
+    ),
+    AttributeInfo(
+        name="language",
+        description="Programming language (python, sql, scala)",
+        type="string"
+    )
+]
+
+# Create self-query retriever
+self_query_retriever = DatabricksSelfQueryRetriever.from_databricks(
+    index_name="catalog.schema.docs_index",
+    endpoint_name="my_endpoint",
+    document_content_description="Technical docs, tutorials, API references",
+    metadata_field_info=metadata_field_info,
+    num_results=5,
+    verbose=True
+)
+
+def self_query_retrieve_node(state):
+    query = state["messages"][-1].content
+
+    # LLM extracts semantic query + filters from natural language
+    # Example: "Python tutorials from user guide after 2024-01-01"
+    # → query: "Python tutorials"
+    # → filters: category='tutorial', language='python',
+    #            source LIKE '%user_guide%', date >= '2024-01-01'
+    docs = self_query_retriever.get_relevant_documents(query)
+
+    return {"retrieved_documents": docs}
+
+def generate_node(state):
+    docs = state["retrieved_documents"]
+    query = state["messages"][-1].content
+
+    # Format with metadata
+    context = "\n\n".join([
+        f"[{doc.metadata.get('source')}] {doc.page_content}"
+        for doc in docs
+    ])
+
+    response = llm.invoke(f"Context: {context}\n\nQuestion: {query}\n\nAnswer:")
+    return {
+        "messages": [AIMessage(content=response.content)],
+        "final_response": response.content
+    }
+
+graph = StateGraph(SelfQueryState)
+graph.add_node("self_query_retrieve", self_query_retrieve_node)
+graph.add_node("generate", generate_node)
+graph.set_entry_point("self_query_retrieve")
+graph.add_edge("self_query_retrieve", "generate")
+graph.add_edge("generate", END)
+agent = graph.compile()
+```
+
+**Example Queries**:
+```python
+# Extracts category='tutorial' AND language='python'
+agent.invoke({"messages": [HumanMessage("Show me Python tutorials")]})
+
+# Extracts date >= '2024-01-01' AND category='api'
+agent.invoke({"messages": [HumanMessage("Find API docs from 2024")]})
+
+# Extracts page >= 10 AND page <= 20
+agent.invoke({"messages": [HumanMessage("Get content from pages 10-20")]})
+```
+
 ## Script Usage
 
 ### Create RAG Agent
@@ -316,6 +414,12 @@ python scripts/create_rag_agent.py my_tool_agent \
 # Multi-hop RAG
 python scripts/create_rag_agent.py my_multihop_agent \
   --type multi-hop \
+  --index-name catalog.schema.docs_index \
+  --endpoint-name my_endpoint
+
+# Self-query RAG
+python scripts/create_rag_agent.py my_selfquery_agent \
+  --type self-query \
   --index-name catalog.schema.docs_index \
   --endpoint-name my_endpoint
 ```
@@ -467,31 +571,32 @@ def compress_context_node(state):
     return {"retrieved_documents": compressed}
 ```
 
-### Self-Querying
+### Self-Querying with LangChain
 ```python
-def self_query_node(state):
-    query = state["messages"][-1].content
+from langchain.chains.query_constructor.base import AttributeInfo
+from self_query_retriever import DatabricksSelfQueryRetriever
 
-    # Extract filter criteria from query
-    extract_prompt = f"""Extract filter criteria from this query:
+# Define metadata schema
+metadata_field_info = [
+    AttributeInfo(name="source", description="Source document", type="string"),
+    AttributeInfo(name="category", description="Document category", type="string"),
+    AttributeInfo(name="date", description="Creation date (YYYY-MM-DD)", type="string")
+]
 
-{query}
+# Create self-query retriever (automatically extracts filters)
+retriever = DatabricksSelfQueryRetriever.from_databricks(
+    index_name="catalog.schema.docs_index",
+    endpoint_name="my_endpoint",
+    document_content_description="Technical documentation and guides",
+    metadata_field_info=metadata_field_info
+)
 
-Return JSON with filters."""
-
-    response = llm.invoke(extract_prompt)
-    filters = parse_filters(response.content)
-
-    # Create retriever with filters
-    filtered_retriever = DatabricksVectorSearchRetriever(
-        index_name=index_name,
-        endpoint_name=endpoint_name,
-        filters=filters
-    )
-
-    docs = filtered_retriever.get_relevant_documents(query)
-    return {"retrieved_documents": docs}
+# Natural language query → LLM extracts filters automatically
+docs = retriever.get_relevant_documents("Show me Python tutorials from after 2024-01-01")
+# Automatically converts to: query="Python tutorials" + filters={date >= "2024-01-01"}
 ```
+
+See **Pattern 4: Self-Query RAG** for complete agent implementation.
 
 ## Error Handling
 
