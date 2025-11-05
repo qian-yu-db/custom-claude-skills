@@ -1,0 +1,48 @@
+{
+  "agents": [
+    {
+      "name": "sales_agent",
+      "type": "genie",
+      "description": "Handles sales data queries, revenue reports, and customer analytics",
+      "config": {
+        "space_id": "sales_space_123"
+      },
+      "keywords": ["sales", "revenue", "customers", "deals", "pipeline"],
+      "enabled": true
+    },
+    {
+      "name": "docs_agent",
+      "type": "rag",
+      "description": "Searches technical documentation, tutorials, and guides",
+      "config": {
+        "index_name": "catalog.schema.docs_index",
+        "endpoint_name": "my_endpoint",
+        "num_results": 5
+      },
+      "keywords": ["documentation", "docs", "tutorial", "guide", "how to"],
+      "enabled": true
+    },
+    {
+      "name": "support_agent",
+      "type": "custom",
+      "description": "Handles customer support tickets and issue tracking",
+      "config": {
+        "api_endpoint": "https://support.example.com/api",
+        "max_tickets": 10
+      },
+      "keywords": ["support", "ticket", "issue", "bug", "problem"],
+      "enabled": true
+    },
+    {
+      "name": "general_agent",
+      "type": "llm",
+      "description": "Handles general questions and conversation",
+      "config": {
+        "model": "databricks-meta-llama-3-1-70b-instruct",
+        "temperature": 0.1,
+        "system_message": "You are a helpful AI assistant."
+      },
+      "enabled": true
+    }
+  ]
+}
