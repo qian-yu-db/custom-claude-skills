@@ -1,143 +1,88 @@
 # Custom Claude Skills Collection
 
-A curated collection of specialized skills for Claude Code to enhance productivity across Databricks development, project management, and general software engineering tasks.
+A curated collection of specialized skills for Claude Code to enhance productivity across Databricks development, LangGraph agents, Python development, and general software engineering tasks.
 
 ## Overview
 
-This repository contains custom skills that extend Claude's capabilities in specific domains. Each skill provides specialized knowledge, workflows, and tool integrations to help you accomplish complex tasks more effectively.
+This repository contains 11 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
 
 ## Available Skills
 
-### Databricks Skills
+### Databricks Platform Skills (3)
 
-#### 1. Databricks Asset Bundle (`databricks-asset-bundle`)
-**Purpose**: Automatically generate Databricks Asset Bundle configurations from notebooks or Python files with task dependencies.
+1. **[databricks-asset-bundle-skill](databricks_platform_skills/databricks-asset-bundle-skill/)** - Generate Databricks Asset Bundle configurations from notebooks/Python files with task dependencies
+2. **[databricks-local-notebook-skill](databricks_platform_skills/databricks-local-notebook-skill/)** - Create Databricks notebooks with local IDE development support via Databricks Connect
+3. **[databricks-agent-deploy-skill](databricks_platform_skills/databricks-agent-deploy-skill/)** - Deploy AI agents on Databricks Apps with complete infrastructure setup
 
-**Key Features**:
-- Automatic task type detection (.ipynb → notebooks, .py → Python wheel tasks)
-- Flexible dependency graph support (linear, parallel, complex patterns)
-- Configurable cluster settings
-- Multi-environment targets (dev/prod)
+### LangGraph Skills (4)
 
-**Use Cases**: ETL pipelines, ML workflows, data integration, analytics jobs
+1. **[langgraph-genie-agent](langgraph_skills/langgraph-genie-agent/)** - Build LangGraph agents with Databricks Genie API for natural language data querying
+2. **[langgraph-unstructured-tool-agent](langgraph_skills/langgraph-unstructured-tool-agent/)** - Build RAG agents with Databricks Vector Search (4 patterns: simple, tool-calling, multi-hop, self-query)
+3. **[langgraph-multi-agent-supervisor](langgraph_skills/langgraph-multi-agent-supervisor/)** - Build multi-agent systems with intelligent supervisor orchestration
+4. **[langgraph-mcp-tool-calling-agent](langgraph_skills/langgraph-mcp-tool-calling-agent/)** - Build agents with Model Context Protocol (MCP) tool integration
 
-**Location**: `databricks_skills/databricks-asset-bundle-skill/`
+### Python Skills (2)
 
-#### 2. Databricks Local Notebook (`databricks-local-notebook`)
-**Purpose**: Generate Databricks notebooks (.py) with seamless local IDE development support using Databricks Connect.
+1. **[pytest-test-creator](python_sklls/pytest-test-creator/)** - Auto-generate comprehensive unit tests using pytest, coverage, and uv
+2. **[python-code-formatter](python_sklls/python-code-formatter/)** - Format Python code with intelligent tool selection (blackbricks for Databricks, black+isort for regular Python)
 
-**Key Features**:
-- Dual environment support (local IDE + Databricks workspace)
-- Four notebook types: Agent, ML, ETL, General
-- Automatic environment detection and connection
-- Type-specific starter code and imports
+### General Skills (2)
 
-**Use Cases**: AI agent development, ML model training, ETL pipelines, data analysis
-
-**Location**: `databricks_skills/databricks-local-notebook-skill/`
-
-#### 3. Databricks Agent Deploy (`databricks-agent-deploy`)
-**Purpose**: Deploy AI agents on Databricks Apps with complete infrastructure setup.
-
-**Key Features**:
-- Complete agent project scaffolding
-- Streaming and non-streaming endpoints
-- MLflow tracing integration
-- Support for tool-calling, RAG, multi-agent, and Genie patterns
-
-**Use Cases**: LangGraph agents, chatbots, RAG systems, multi-agent workflows
-
-**Location**: `databricks_skills/databricks-agent-deploy-skill/`
-
-### General Skills
-
-#### 4. Jira Epic Creator (`jira-epic-creator`)
-**Purpose**: Transform documents into structured Jira epics with comprehensive user stories following a standardized 5-section template.
-
-**Key Features**:
-- 5-section epic template enforcement
-- Automatic story breakdown with acceptance criteria
-- Document analysis (extracts problems, solutions, metrics)
-- INVEST principles and vertical slicing
-
-**Use Cases**: Requirements docs, feature requests, project proposals, sprint planning
-
-**Location**: `general_skills/jira-epic-creator/`
+1. **[jira-epic-creator-skill](general_skills/jira-epic-creator-skill/)** - Transform documents into structured Jira epics with comprehensive user stories
+2. **[battle-card-creator-skill](general_skills/battle-card-creator-skill/)** - Automate competitive battle card creation with research guidelines and templates
 
 ## Repository Structure
 
 ```
 custom-claude-skills/
-├── databricks_skills/
-│   ├── databricks-asset-bundle-skill/
-│   ├── databricks-local-notebook-skill/
-│   └── databricks-agent-deploy-skill/
-├── general_skills/
-│   └── jira-epic-creator/
-├── langgraph_skills/          # Future LangGraph-specific skills
-├── python_sklls/              # Future Python-specific skills
-└── README.md                  # This file
+├── databricks_platform_skills/    # 3 Databricks skills
+├── langgraph_skills/              # 4 LangGraph agent skills
+├── python_sklls/                  # 2 Python development skills
+├── general_skills/                # 2 general-purpose skills
+└── README.md
 ```
 
 ## Installation
 
-Each skill is self-contained in its own directory. To use a skill:
+Each skill is self-contained in its own directory with detailed documentation:
 
 1. Navigate to the specific skill directory
 2. Follow the installation instructions in the skill's README.md
-3. Upload the skill package (.zip) to Claude Code
-
-Example:
-```bash
-cd databricks_skills/databricks-asset-bundle-skill
-# Follow instructions in README.md
-```
-
-## Quick Start Guide
-
-### For Databricks Development
-1. Start with `databricks-local-notebook` to create notebooks
-2. Use `databricks-asset-bundle` to orchestrate workflows
-3. Deploy agents with `databricks-agent-deploy`
-
-### For Project Management
-1. Use `jira-epic-creator` to transform requirements into actionable epics
+3. Upload the skill package to Claude Code as needed
 
 ## Documentation
 
-Each skill includes comprehensive documentation:
+Each skill includes comprehensive documentation in its directory:
+- **README.md** - Overview and quick start
+- **SKILL.md** - Main skill instructions for Claude
+- **QUICK_REFERENCE.md** - Command reference card (where applicable)
+- **Reference guides** - Detailed technical documentation
 
-- **README.md**: Overview and quick start
-- **USAGE_GUIDE.md**: Detailed examples and scenarios
-- **QUICK_REFERENCE.md**: Command reference card
-- **SKILL.md**: Main skill instructions for Claude
+## Quick Start Examples
 
-## Contributing
+**Databricks Development**:
+```bash
+# Create a notebook → orchestrate with DAB → deploy agents
+databricks-local-notebook → databricks-asset-bundle → databricks-agent-deploy
+```
 
-Skills are organized by domain:
-- `databricks_skills/`: Databricks-specific capabilities
-- `general_skills/`: Cross-domain utilities
-- `langgraph_skills/`: LangGraph development (coming soon)
-- `python_sklls/`: Python development utilities (coming soon)
+**LangGraph Agent Development**:
+```bash
+# Build specialized agents → combine with supervisor
+langgraph-genie-agent + langgraph-unstructured-tool-agent → langgraph-multi-agent-supervisor
+```
+
+**Python Development**:
+```bash
+# Format code → generate tests
+python-code-formatter → pytest-test-creator
+```
 
 ## Requirements
 
-### General
 - Claude Code CLI
 - Git for version control
-
-### Skill-Specific
-Refer to individual skill READMEs for specific requirements:
-- Databricks skills require Databricks workspace and CLI
-- Agent skills require Python 3.10+
-- JIRA skills work with any text document format
-
-## Support
-
-For issues or questions:
-- Check the specific skill's documentation
-- Review the QUICK_REFERENCE.md for common operations
-- Consult the USAGE_GUIDE.md for examples
+- Skill-specific requirements (see individual skill READMEs)
 
 ## License
 
@@ -145,4 +90,4 @@ Apache-2.0
 
 ## Version
 
-Last updated: October 2025
+Last updated: November 2025
