@@ -12,7 +12,7 @@ This repository contains 11 custom skills organized by domain. Each skill provid
 
 1. **[databricks-asset-bundle-skill](databricks_platform_skills/databricks-asset-bundle-skill/)** - Generate Databricks Asset Bundle configurations from notebooks/Python files with task dependencies
 2. **[databricks-local-notebook-skill](databricks_platform_skills/databricks-local-notebook-skill/)** - Create Databricks notebooks with local IDE development support via Databricks Connect
-3. **[databricks-agent-deploy-skill](databricks_platform_skills/databricks-agent-deploy-skill/)** - Deploy AI agents on Databricks Apps with complete infrastructure setup
+3. **[databricks-agent-deploy2app-skill](databricks_platform_skills/databricks-agent-deploy2app-skill/)** - Deploy AI agents to Databricks Apps with complete infrastructure setup
 
 ### LangGraph Skills (4)
 
@@ -62,8 +62,8 @@ Each skill includes comprehensive documentation in its directory:
 
 **Databricks Development**:
 ```bash
-# Create a notebook → orchestrate with DAB → deploy agents
-databricks-local-notebook → databricks-asset-bundle → databricks-agent-deploy
+# Create a notebook → orchestrate with DAB → deploy agents to Apps
+databricks-local-notebook → databricks-asset-bundle → databricks-agent-deploy2app
 ```
 
 **LangGraph Agent Development**:
