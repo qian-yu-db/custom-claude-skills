@@ -4,15 +4,16 @@ A curated collection of specialized skills for Claude Code to enhance productivi
 
 ## Overview
 
-This repository contains 11 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
+This repository contains 12 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
 
 ## Available Skills
 
-### Databricks Platform Skills (3)
+### Databricks Platform Skills (4)
 
 1. **[databricks-asset-bundle-skill](databricks_platform_skills/databricks-asset-bundle-skill/)** - Generate Databricks Asset Bundle configurations from notebooks/Python files with task dependencies
 2. **[databricks-local-notebook-skill](databricks_platform_skills/databricks-local-notebook-skill/)** - Create Databricks notebooks with local IDE development support via Databricks Connect
 3. **[databricks-agent-deploy2app-skill](databricks_platform_skills/databricks-agent-deploy2app-skill/)** - Deploy AI agents to Databricks Apps with complete infrastructure setup
+4. **[databricks-agent-deploy-model-serving-dab](databricks_platform_skills/databricks-agent-deploy-model-serving-dab/)** - Deploy agents (LangGraph, OpenAI, custom) to Model Serving using Databricks Asset Bundles
 
 ### LangGraph Skills (4)
 
@@ -35,7 +36,7 @@ This repository contains 11 custom skills organized by domain. Each skill provid
 
 ```
 custom-claude-skills/
-├── databricks_platform_skills/    # 3 Databricks skills
+├── databricks_platform_skills/    # 4 Databricks skills
 ├── langgraph_skills/              # 4 LangGraph agent skills
 ├── python_sklls/                  # 2 Python development skills
 ├── general_skills/                # 2 general-purpose skills
@@ -62,8 +63,9 @@ Each skill includes comprehensive documentation in its directory:
 
 **Databricks Development**:
 ```bash
-# Create a notebook → orchestrate with DAB → deploy agents to Apps
+# Create a notebook → orchestrate with DAB → deploy to Apps or Model Serving
 databricks-local-notebook → databricks-asset-bundle → databricks-agent-deploy2app
+                                                     → databricks-agent-deploy-model-serving-dab
 ```
 
 **LangGraph Agent Development**:
