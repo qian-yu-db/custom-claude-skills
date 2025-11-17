@@ -4,15 +4,15 @@ A curated collection of specialized skills for Claude Code to enhance productivi
 
 ## Overview
 
-This repository contains 12 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
+This repository contains 13 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
 
 ## Available Skills
 
 ### Databricks Platform Skills (4)
 
-1. **[databricks-asset-bundle-skill](databricks_platform_skills/databricks-asset-bundle-skill/)** - Generate Databricks Asset Bundle configurations from notebooks/Python files with task dependencies
-2. **[databricks-local-notebook-skill](databricks_platform_skills/databricks-local-notebook-skill/)** - Create Databricks notebooks with local IDE development support via Databricks Connect
-3. **[databricks-agent-deploy2app-skill](databricks_platform_skills/databricks-agent-deploy2app-skill/)** - Deploy AI agents to Databricks Apps with complete infrastructure setup
+1. **[databricks-asset-bundle](databricks_platform_skills/databricks-asset-bundle/)** - Generate Databricks Asset Bundle configurations from notebooks/Python files with task dependencies
+2. **[databricks-local-notebook](databricks_platform_skills/databricks-local-notebook/)** - Create Databricks notebooks with local IDE development support via Databricks Connect
+3. **[databricks-agent-deploy2app](databricks_platform_skills/databricks-agent-deploy2app/)** - Deploy AI agents to Databricks Apps with complete infrastructure setup
 4. **[databricks-agent-deploy-model-serving-dab](databricks_platform_skills/databricks-agent-deploy-model-serving-dab/)** - Deploy agents (LangGraph, OpenAI, custom) to Model Serving using Databricks Asset Bundles
 
 ### LangGraph Skills (4)
@@ -27,10 +27,14 @@ This repository contains 12 custom skills organized by domain. Each skill provid
 1. **[pytest-test-creator](python_sklls/pytest-test-creator/)** - Auto-generate comprehensive unit tests using pytest, coverage, and uv
 2. **[python-code-formatter](python_sklls/python-code-formatter/)** - Format Python code with intelligent tool selection (blackbricks for Databricks, black+isort for regular Python)
 
+### Project Skills (1)
+
+1. **[project-starter](project-skills/project-starter/)** - Bootstrap new projects with curated skills, documentation templates, and initial scaffolding
+
 ### General Skills (2)
 
-1. **[jira-epic-creator-skill](general_skills/jira-epic-creator-skill/)** - Transform documents into structured Jira epics with comprehensive user stories
-2. **[battle-card-creator-skill](general_skills/battle-card-creator-skill/)** - Automate competitive battle card creation with research guidelines and templates
+1. **[jira-epic-creator](general_skills/jira-epic-creator/)** - Transform documents into structured Jira epics with comprehensive user stories
+2. **[battle-card-creator](general_skills/battle-card-creator/)** - Automate competitive battle card creation with research guidelines and templates
 
 ## Repository Structure
 
@@ -39,6 +43,7 @@ custom-claude-skills/
 ├── databricks_platform_skills/    # 4 Databricks skills
 ├── langgraph_skills/              # 4 LangGraph agent skills
 ├── python_sklls/                  # 2 Python development skills
+├── project-skills/                # 1 Project bootstrapping skill
 ├── general_skills/                # 2 general-purpose skills
 └── README.md
 ```
@@ -61,6 +66,12 @@ Each skill includes comprehensive documentation in its directory:
 
 ## Quick Start Examples
 
+**Bootstrap New Project**:
+```bash
+# Start a new project with curated skills
+project-starter → (select skills) → auto-generate project structure + docs
+```
+
 **Databricks Development**:
 ```bash
 # Create a notebook → orchestrate with DAB → deploy to Apps or Model Serving
@@ -78,6 +89,12 @@ langgraph-genie-agent + langgraph-unstructured-tool-agent → langgraph-multi-ag
 ```bash
 # Format code → generate tests
 python-code-formatter → pytest-test-creator
+```
+
+**Project Management**:
+```bash
+# Document requirements → create JIRA epics → competitive analysis
+jira-epic-creator → battle-card-creator
 ```
 
 ## Requirements
