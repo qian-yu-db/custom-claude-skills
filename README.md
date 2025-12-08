@@ -1,19 +1,19 @@
 # Custom Claude Skills Collection
 
-A curated collection of specialized skills for Claude Code to enhance productivity across Databricks development, LangGraph agents, Python development, and general software engineering tasks.
+A curated collection of specialized skills for Claude Code to enhance productivity across Databricks development, LangGraph agents, Python development, planning & visualization, and general software engineering tasks.
 
 ## Overview
 
-This repository contains 13 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
+This repository contains 15 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
 
 ## Available Skills
 
 ### Databricks Platform Skills (4)
 
-1. **[databricks-asset-bundle](databricks_platform_skills/databricks-asset-bundle/)** - Generate Databricks Asset Bundle configurations from notebooks/Python files with task dependencies
+1. **[databricks-asset-bundle](databricks_platform_skills/databricks-asset-bundle/)** - Generate Databricks Asset Bundle configurations with serverless compute, modular structure, and multiple input formats (text, Mermaid diagrams, workflow images)
 2. **[databricks-local-notebook](databricks_platform_skills/databricks-local-notebook/)** - Create Databricks notebooks with local IDE development support via Databricks Connect
 3. **[databricks-agent-deploy2app](databricks_platform_skills/databricks-agent-deploy2app/)** - Deploy AI agents to Databricks Apps with complete infrastructure setup
-4. **[databricks-agent-deploy-model-serving-dab](databricks_platform_skills/databricks-agent-deploy-model-serving-dab/)** - Deploy agents (LangGraph, OpenAI, custom) to Model Serving using Databricks Asset Bundles
+4. **[databricks-agent-deploy-model-serving-dab](databricks_platform_skills/databricks-agent-deploy-model-serving-dab/)** - Deploy agents (LangGraph, OpenAI, custom) to Model Serving using Databricks Asset Bundles with serverless compute
 
 ### LangGraph Skills (4)
 
@@ -27,9 +27,14 @@ This repository contains 13 custom skills organized by domain. Each skill provid
 1. **[pytest-test-creator](python_sklls/pytest-test-creator/)** - Auto-generate comprehensive unit tests using pytest, coverage, and uv
 2. **[python-code-formatter](python_sklls/python-code-formatter/)** - Format Python code with intelligent tool selection (blackbricks for Databricks, black+isort for regular Python)
 
+### Planning & Visualization Skills (2)
+
+1. **[mermaid-diagrams-creator](develop_planning_skills/mermaid-diagrams-creator/)** - Create clean Mermaid diagrams (flowcharts, sequence, class, ER, state) with automatic PNG/SVG/PDF generation
+2. **[cross-platform-skill](develop_planning_skills/cross-platform-skill/)** - Convert Claude Code skills to work with Codex CLI and Gemini CLI for cross-platform compatibility
+
 ### Project Skills (1)
 
-1. **[project-starter](project-skills/project-starter/)** - Bootstrap new projects with curated skills, documentation templates, and initial scaffolding
+1. **[project-starter](project-skills/project-starter/)** - Bootstrap new projects with curated skills, uv environment management, documentation templates, and initial scaffolding (v1.2.0)
 
 ### General Skills (2)
 
@@ -43,8 +48,9 @@ custom-claude-skills/
 ├── databricks_platform_skills/    # 4 Databricks skills
 ├── langgraph_skills/              # 4 LangGraph agent skills
 ├── python_sklls/                  # 2 Python development skills
+├── develop_planning_skills/       # 2 Planning & visualization skills
 ├── project-skills/                # 1 Project bootstrapping skill
-├── general_skills/                # 2 general-purpose skills
+├── general_skills/                # 2 General-purpose skills
 └── README.md
 ```
 
@@ -68,8 +74,14 @@ Each skill includes comprehensive documentation in its directory:
 
 **Bootstrap New Project**:
 ```bash
-# Start a new project with curated skills
-project-starter → (select skills) → auto-generate project structure + docs
+# Start a new project with curated skills and uv environment
+project-starter → (select skills) → auto-generate project structure + docs + uv setup
+```
+
+**Visual Workflow to Production**:
+```bash
+# Design workflow → generate DAB → deploy with serverless
+mermaid-diagrams-creator → databricks-asset-bundle → databricks-agent-deploy-model-serving-dab
 ```
 
 **Databricks Development**:
@@ -87,14 +99,26 @@ langgraph-genie-agent + langgraph-unstructured-tool-agent → langgraph-multi-ag
 
 **Python Development**:
 ```bash
-# Format code → generate tests
+# Format code → generate tests (all with uv)
 python-code-formatter → pytest-test-creator
+```
+
+**Architecture Documentation**:
+```bash
+# Create diagrams → export images → document system
+mermaid-diagrams-creator → (auto-generate PNG/SVG/PDF)
 ```
 
 **Project Management**:
 ```bash
 # Document requirements → create JIRA epics → competitive analysis
 jira-epic-creator → battle-card-creator
+```
+
+**Cross-Platform Sharing**:
+```bash
+# Convert skills for other AI coding assistants
+cross-platform-skill → (generate Codex/Gemini compatible instructions)
 ```
 
 ## Requirements
@@ -109,4 +133,12 @@ Apache-2.0
 
 ## Version
 
-Last updated: November 2025
+**v1.2.0** - December 2025
+
+### Recent Updates
+- Added **mermaid-diagrams-creator** skill with automatic image generation (PNG/SVG/PDF)
+- Added **cross-platform-skill** for Codex CLI and Gemini CLI compatibility
+- Enhanced **databricks-asset-bundle** with serverless compute, Mermaid diagram support, and visual workflow parsing
+- Updated **project-starter** to v1.2.0 with uv package management (10-100x faster than pip)
+- Added YAML frontmatter to all 15 skills for better discoverability
+- Total skills: 13 → 15
