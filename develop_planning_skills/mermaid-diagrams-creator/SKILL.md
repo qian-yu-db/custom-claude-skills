@@ -1,18 +1,41 @@
 ---
 name: mermaid-diagrams
-description: Create clean, well-structured Mermaid diagrams for flowcharts, sequence diagrams, class diagrams, ER diagrams, state diagrams, and architecture visuals. Use when the user asks to create diagrams, visualize workflows, model systems, document APIs, show data relationships, or generate architecture documentation. Handles syntax nuances, layout optimization, and common pitfalls across all Mermaid diagram types.
+description: Create clean, well-structured Mermaid diagrams for flowcharts, sequence diagrams, class diagrams, ER diagrams, state diagrams, and architecture visuals. ALWAYS generates both .mermaid source files AND image files (PNG/SVG/PDF) using mermaid CLI. Use when the user asks to create diagrams, visualize workflows, model systems, document APIs, show data relationships, or generate architecture documentation. Handles syntax nuances, layout optimization, and common pitfalls across all Mermaid diagram types.
 ---
 
 # Mermaid Diagrams Skill
 
-Create Mermaid diagrams that render correctly and communicate clearly. Mermaid files (`.mermaid`) render as visual artifacts in Claude.
+Create Mermaid diagrams that render correctly and communicate clearly.
+
+**Key Feature**: This skill creates **both** `.mermaid` source files AND image files (PNG/SVG/PDF).
+
+## Two-Step Process
+
+Every diagram creation involves:
+1. **Create .mermaid file** - Editable source that renders as visual artifact in Claude
+2. **Generate image file** - Portable PNG/SVG/PDF using mermaid CLI (**MANDATORY**)
+
+**Never skip the image generation step!** Users need the image file for sharing, documentation, and presentations.
 
 ## Workflow
 
-1. Identify the best diagram type for the request
-2. Generate clean Mermaid syntax following the patterns below
-3. Save as `.mermaid` file to `/mnt/user-data/outputs/`
-4. Generate image file (PNG/SVG/PDF) using mermaid CLI
+**IMPORTANT**: Always complete ALL steps below. Do not skip image generation.
+
+1. **Identify** the best diagram type for the request
+2. **Generate** clean Mermaid syntax following the patterns below
+3. **Save** as `.mermaid` file to `/mnt/user-data/outputs/`
+4. **Generate image** (PNG by default) using mermaid CLI - **THIS STEP IS MANDATORY**
+5. **Verify** both `.mermaid` and image file were created successfully
+
+### Step-by-Step Execution
+
+After creating the `.mermaid` file, you MUST immediately run:
+
+```bash
+mmdc -i /mnt/user-data/outputs/diagram-name.mermaid -o /mnt/user-data/outputs/diagram-name.png -b white
+```
+
+If `mmdc` is not available, check installation and guide the user to install it.
 
 ## Mermaid CLI Setup
 
@@ -253,18 +276,34 @@ flowchart LR
 
 ## Output
 
+**CRITICAL**: Always create BOTH files - never just the .mermaid file alone!
+
 Save diagrams to `/mnt/user-data/outputs/` with both source and rendered formats:
 
-1. **Source file**: `diagram-name.mermaid` (renders as visual artifact in Claude)
-2. **Image file**: `diagram-name.png` (or `.svg`/`.pdf` based on preference)
+1. **Source file**: `diagram-name.mermaid` (editable source, renders as visual artifact in Claude)
+2. **Image file**: `diagram-name.png` (portable image for sharing/documentation) - **REQUIRED**
 
-### Default Image Generation
+### Mandatory Image Generation
 
-After creating the `.mermaid` file, automatically generate a PNG image:
+**You MUST always generate an image file after creating the .mermaid file.**
+
+Default command (PNG with white background):
 
 ```bash
 mmdc -i /mnt/user-data/outputs/diagram-name.mermaid -o /mnt/user-data/outputs/diagram-name.png -b white
 ```
+
+**Execution checklist:**
+- ✅ Write .mermaid file
+- ✅ Run mmdc command to generate PNG
+- ✅ Verify both files exist
+- ✅ Show user both file paths
+
+**If mmdc command fails:**
+1. Check if mmdc is installed: `which mmdc` or `mmdc --version`
+2. If not installed, guide user to install: `npm install -g @mermaid-js/mermaid-cli`
+3. Retry image generation after installation
+4. If still fails, check troubleshooting section below
 
 This provides both the editable source and a portable image for sharing, documentation, or presentation.
 
@@ -327,5 +366,69 @@ mmdc -i input.mermaid -o output.png -s 3
 # Use SVG for infinite scaling
 mmdc -i input.mermaid -o output.svg
 ```
+
+## Complete Example Workflow
+
+Here's exactly what you should do when a user asks for a diagram:
+
+**User request**: "Create a flowchart showing the authentication process"
+
+**Your actions**:
+
+1. **Create the .mermaid file**:
+```bash
+# Write the mermaid content to file
+cat > /mnt/user-data/outputs/auth-flow.mermaid << 'EOF'
+flowchart TB
+    Start[User Login] --> ValidateInput{Valid Credentials?}
+    ValidateInput -->|Yes| CheckDB[Query Database]
+    ValidateInput -->|No| Error[Show Error]
+    CheckDB --> UserExists{User Exists?}
+    UserExists -->|Yes| GenerateToken[Generate JWT Token]
+    UserExists -->|No| Error
+    GenerateToken --> Success[Login Success]
+    Error --> End[End]
+    Success --> End
+EOF
+```
+
+2. **Generate the PNG image**:
+```bash
+# MANDATORY: Generate image from .mermaid file
+mmdc -i /mnt/user-data/outputs/auth-flow.mermaid -o /mnt/user-data/outputs/auth-flow.png -b white
+```
+
+3. **Verify and inform user**:
+```bash
+# Check both files exist
+ls -lh /mnt/user-data/outputs/auth-flow.*
+
+# Output to user:
+# ✅ Created auth-flow.mermaid (source file)
+# ✅ Created auth-flow.png (image file - 45 KB)
+```
+
+**What NOT to do**:
+- ❌ Create only the .mermaid file and stop
+- ❌ Tell the user to run mmdc themselves
+- ❌ Skip image generation because you think it's optional
+- ❌ Forget to verify both files were created
+
+**If mmdc is not installed**:
+1. Check: `which mmdc`
+2. If not found, inform user: "mmdc not found. Installing mermaid CLI..."
+3. Guide installation: `npm install -g @mermaid-js/mermaid-cli`
+4. Retry image generation after installation
+
+## Quick Pre-Flight Check
+
+Before creating any diagram, verify mermaid CLI is available:
+
+```bash
+# Check if mmdc is installed
+mmdc --version
+```
+
+If this succeeds, proceed with diagram creation. If it fails, install mermaid CLI first.
 
 For detailed syntax reference and advanced patterns, see [references/syntax-guide.md](references/syntax-guide.md).

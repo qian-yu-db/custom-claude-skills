@@ -236,11 +236,92 @@ uv run python src/main.py
 uv lock --upgrade && uv sync
 ```
 
+## Git Submodules Workflow
+
+Projects created with project-starter use **git submodules** to include the custom-claude-skills repository. This ensures skill source code travels with your project.
+
+### When Creating a Project
+
+The bootstrap script automatically:
+1. Adds custom-claude-skills as a submodule in `.claude/skills-repo/`
+2. Creates `.gitmodules` file tracking the submodule
+3. Creates symlinks in `.claude/skills/` pointing to selected skills
+
+```bash
+# After running bootstrap_project.py, commit your project:
+cd my-new-project
+git add .
+git commit -m "Initial project setup with skills"
+git remote add origin https://github.com/user/my-new-project.git
+git push -u origin main
+```
+
+### When Cloning a Project
+
+**Always use `--recurse-submodules`:**
+```bash
+git clone --recurse-submodules https://github.com/user/my-project.git
+```
+
+This ensures you get:
+- The project code
+- The complete custom-claude-skills repository in `.claude/skills-repo/`
+- All skill symlinks working correctly
+
+**If you forgot `--recurse-submodules`:**
+```bash
+cd my-project
+git submodule update --init --recursive
+```
+
+### Benefits of Using Submodules
+
+1. **Reproducibility** - Skills pinned to specific commit SHA
+2. **Portability** - No manual skill installation needed
+3. **Version Control** - Track which skill versions your project uses
+4. **Self-Contained** - Project includes all dependencies (code + skills)
+5. **Easy Collaboration** - Team members get correct skill versions automatically
+
+### Submodule Structure
+
+```
+my-project/
+├── .gitmodules                     # Tracks submodule (committed)
+├── .claude/
+│   ├── skills-repo/                # Git submodule (auto-cloned)
+│   │   ├── databricks_platform_skills/
+│   │   ├── langgraph_skills/
+│   │   ├── python_sklls/
+│   │   └── ... (15 skills)
+│   └── skills/                     # Symlinks (committed)
+│       ├── langgraph-genie-agent -> ../skills-repo/langgraph_skills/langgraph-genie-agent
+│       └── databricks-asset-bundle -> ../skills-repo/databricks_platform_skills/databricks-asset-bundle
+```
+
 ## Troubleshooting
 
 ### Submodule Issues
+
+**Problem**: `.claude/skills-repo/` is empty after cloning
 ```bash
+# Solution: Initialize submodules
 git submodule update --init --recursive
+```
+
+**Problem**: Submodule shows as "modified" in git status
+```bash
+# Solution: Update to project's expected commit
+git submodule update .claude/skills-repo
+
+# Or update to latest remote commit
+git submodule update --remote .claude/skills-repo
+```
+
+**Problem**: Skills not working after cloning
+```bash
+# Solution: Reinitialize submodules and verify symlinks
+git submodule update --init --recursive
+ls -la .claude/skills/  # Verify symlinks point to skills-repo/
 ```
 
 ### Symlink Issues (Windows)
@@ -262,9 +343,10 @@ To add new skills to the catalog:
 
 ## Version
 
-**v1.2.0** - December 2025
+**v1.2.1** - December 2025
 
 **Changelog:**
+- v1.2.1: Enhanced git submodule documentation and workflow (ensures skills travel with projects)
 - v1.2.0: Use uv for Python environment management instead of pip/venv
 - v1.1.0: Added mermaid-diagrams-creator skill, updated databricks-asset-bundle with new features
 - v1.0.0: Initial release with 12 skills

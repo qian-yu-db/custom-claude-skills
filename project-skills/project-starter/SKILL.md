@@ -128,11 +128,21 @@ Execute these actions:
    ```bash
    git submodule add https://github.com/qian-yu-db/custom-claude-skills .claude/skills-repo
    git submodule update --init --recursive
+   git add .gitmodules .claude/skills-repo
    ```
+   **Why submodules?**
+   - Ensures skill source code travels with the project
+   - When others clone the project with `--recurse-submodules`, they get the full skills repo
+   - Pins specific version of skills via git commit SHA
+   - Makes projects fully reproducible without manual skill installation
+
 5. **Create symlinks** for selected skills:
    ```bash
    ln -s ../.claude/skills-repo/[skill-path] .claude/skills/[skill-name]
    ```
+   **Note**: Symlinks point to the submodule, creating a clean separation between:
+   - `.claude/skills-repo/` - Complete skills repository (git submodule)
+   - `.claude/skills/` - Symlinks to only the selected skills for this project
 
 ### Step 4: Generate Project Context
 Create `.claude/project-context.md`:
@@ -464,9 +474,48 @@ pip install uv
 ```
 
 ### Submodule Issues
-If skills-repo submodule is not properly initialized:
+
+**Problem**: Skills repository not found after cloning project
+**Cause**: Project cloned without `--recurse-submodules` flag
+**Solution**:
 ```bash
+# Initialize and fetch submodules
 git submodule update --init --recursive
+```
+
+**Problem**: `.claude/skills-repo/` is empty
+**Cause**: Submodule not initialized
+**Solution**:
+```bash
+# Initialize all submodules recursively
+cd <project-root>
+git submodule update --init --recursive
+```
+
+**Problem**: Submodule shows as "modified" in git status
+**Cause**: Submodule pointing to different commit than expected
+**Solution**:
+```bash
+# Update submodule to match what project expects
+git submodule update --remote .claude/skills-repo
+# Or reset to commit recorded in project
+git submodule update .claude/skills-repo
+```
+
+**Best Practice for Cloning Projects**:
+Always use `--recurse-submodules` when cloning projects created with project-starter:
+```bash
+git clone --recurse-submodules https://github.com/user/project.git
+```
+
+**Best Practice for Pushing Projects**:
+After creating a project, commit and push including the submodule reference:
+```bash
+cd my-new-project
+git add .
+git commit -m "Initial project setup with skills"
+git remote add origin https://github.com/user/my-new-project.git
+git push -u origin main
 ```
 
 ### Symlink Issues
@@ -593,9 +642,10 @@ custom-claude-skills/
 If repository structure changes, update the Skill Catalog section accordingly.
 
 ## Version
-- **Version**: 1.2.0
+- **Version**: 1.2.1
 - **Last Updated**: December 2025
 - **Changelog**:
+  - v1.2.1: Enhanced git submodule documentation and workflow (ensures skills travel with projects)
   - v1.2.0: Use uv for Python environment management instead of pip/venv
   - v1.1.0: Added mermaid-diagrams-creator skill, updated databricks-asset-bundle description
   - v1.0.0: Initial release with 12 skills

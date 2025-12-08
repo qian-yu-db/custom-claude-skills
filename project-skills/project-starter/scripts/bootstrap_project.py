@@ -79,15 +79,29 @@ def initialize_git(project_root: Path):
 
 def add_skills_submodule(project_root: Path):
     """Add custom-claude-skills as a git submodule."""
+    print("Adding custom-claude-skills repository as git submodule...")
+
+    # Add submodule
     run_command(
         ["git", "submodule", "add", SKILLS_REPO, ".claude/skills-repo"],
         cwd=project_root
     )
+
+    # Initialize and update submodules
     run_command(
         ["git", "submodule", "update", "--init", "--recursive"],
         cwd=project_root
     )
-    print("✅ Added skills repository as submodule")
+
+    # Commit the .gitmodules file and submodule reference
+    run_command(
+        ["git", "add", ".gitmodules", ".claude/skills-repo"],
+        cwd=project_root
+    )
+
+    print("✅ Added skills repository as submodule (.gitmodules created)")
+    print("   When you push this project to GitHub, others can clone with:")
+    print("   git clone --recurse-submodules <your-repo-url>")
 
 
 def link_skills(project_root: Path, skills: List[str]):
@@ -236,9 +250,12 @@ def generate_readme(project_root: Path, project_name: str, skills: List[str]):
 ### Installation
 
 ```bash
-# Clone with submodules
+# Clone with submodules (IMPORTANT: includes skill repository)
 git clone --recurse-submodules <repo-url>
 cd {project_name}
+
+# If you already cloned without --recurse-submodules, initialize submodules:
+# git submodule update --init --recursive
 
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -246,6 +263,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Sync dependencies (creates .venv and installs packages)
 uv sync
 ```
+
+**Note**: This project uses git submodules to include the custom-claude-skills repository in `.claude/skills-repo/`. The skills directory contains symlinks to the selected skills from this submodule. Always clone with `--recurse-submodules` or run `git submodule update --init --recursive` after cloning.
 
 ### Running Commands
 
@@ -460,7 +479,7 @@ def print_summary(project_name: str, project_root: Path, skills: List[str]):
     for skill_path in skills:
         skill_name = Path(skill_path).name
         print(f"   - {skill_name}")
-    
+
     print("\n📋 Next Steps:")
     print(f"   1. cd {project_name}")
     print("   2. uv sync  # Sync dependencies and create .venv")
@@ -468,10 +487,19 @@ def print_summary(project_name: str, project_root: Path, skills: List[str]):
     print("   4. Run: claude-code chat")
     print("   5. Paste/reference the initialization prompt")
     print("   6. Claude Code will generate documentation and scaffolding")
+
+    print("\n🔧 Git & Submodules:")
+    print("   - Skills repo added as git submodule in .claude/skills-repo/")
+    print("   - Commit your initial setup: git commit -m 'Initial project setup'")
+    print("   - Push to remote: git push -u origin main")
+    print("   - Others can clone with: git clone --recurse-submodules <repo-url>")
+    print("   - If they forgot: git submodule update --init --recursive")
+
     print("\n💡 Tips:")
     print("   - Use 'uv run <command>' to run commands in project environment")
     print("   - Use 'uv add <package>' to add dependencies")
     print("   - Use 'claude-code chat' to interact with your project skills")
+    print("   - The .gitmodules file tracks the skills repo - don't delete it!")
     print("="*60 + "\n")
 
 
