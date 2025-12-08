@@ -34,7 +34,7 @@ This repository contains 15 custom skills organized by domain. Each skill provid
 
 ### Project Skills (1)
 
-1. **[project-starter](project-skills/project-starter/)** - Bootstrap new projects with curated skills, uv environment management, documentation templates, and initial scaffolding (v1.2.0)
+1. **[project-starter](project-skills/project-starter/)** - Bootstrap new projects with curated skills, uv environment management, git submodules for skill portability, and comprehensive documentation (v1.2.1)
 
 ### General Skills (2)
 
@@ -133,9 +133,15 @@ Apache-2.0
 
 ## Version
 
-**v1.2.0** - December 2025
+**v1.2.1** - December 2025
 
 ### Recent Updates
+
+**v1.2.1** (December 7, 2025):
+- 🔧 **Fixed mermaid-diagrams-creator**: Made image generation **mandatory** - now always creates both .mermaid source AND PNG/SVG/PDF images
+- ✨ **Enhanced project-starter** to v1.2.1: Improved git submodule workflow with comprehensive documentation for cloning projects with skills intact
+
+**v1.2.0** (December 2025):
 - Added **mermaid-diagrams-creator** skill with automatic image generation (PNG/SVG/PDF)
 - Added **cross-platform-skill** for Codex CLI and Gemini CLI compatibility
 - Enhanced **databricks-asset-bundle** with serverless compute, Mermaid diagram support, and visual workflow parsing
