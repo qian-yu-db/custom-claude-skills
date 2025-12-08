@@ -1,3 +1,8 @@
+---
+name: python-code-formatter
+description: Auto-format Python code with intelligent tool selection based on file type using uv package management. Uses blackbricks for Databricks notebooks (preserves cell structure), black+isort for regular Python, and ruff for linting. Use when formatting code, fixing style issues, or preparing code for CI/CD.
+---
+
 # Python Code Formatter Skill
 
 ## Purpose

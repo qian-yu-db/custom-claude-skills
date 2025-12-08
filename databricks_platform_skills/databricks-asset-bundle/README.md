@@ -1,6 +1,6 @@
 # Databricks Asset Bundle Skill - Complete Package
 
-🎯 **Purpose**: Automatically generate Databricks Asset Bundle configurations from notebooks or Python files with task dependencies.
+🎯 **Purpose**: Automatically generate production-ready Databricks Asset Bundles with serverless compute, modular structure, and multiple input formats (text, Mermaid diagrams, or workflow images).
 
 ## 📦 Package Contents
 
@@ -14,6 +14,29 @@
 | `sample_databricks.yml` | Example output showing what gets generated |
 | `README.md` | This file - your starting point |
 
+## 🌟 New Features
+
+### ⚡ Serverless Compute (Default)
+- Uses Databricks Serverless compute (client version 3)
+- Fast startup, cost-effective, no cluster management
+- Option to use traditional clusters with `--no-serverless`
+
+### 📊 Multiple Input Formats
+1. **Text descriptions**: Simple task:path format with dependencies
+2. **Mermaid diagrams**: Parse flowcharts automatically
+3. **Diagram images**: AI-powered extraction from PNG/JPG/GIF/WebP
+
+### 🏗️ Modular Structure
+- **databricks.yml**: Main bundle with variables
+- **resources/*.job.yml**: Separate job definitions
+- **src/**: Source code directory
+- **run_workflow.sh**: Automated deployment script
+
+### ⚙️ Variable Management
+- Configurable catalog, schema, paths
+- Override at runtime with `--var` flags
+- Environment-specific settings (dev/prod)
+
 ## 🚀 Quick Start
 
 ### 1. Install the Skill
@@ -21,17 +44,37 @@
 - The skill will automatically activate when you describe Databricks workflows
 
 ### 2. Use the Skill
-Simply tell Claude about your pipeline:
+Simply tell Claude about your pipeline using any input method:
 
+**Text description:**
 ```
 Create a Databricks Asset Bundle for my ETL pipeline:
-- extract_data.ipynb extracts from source
-- transform_data.py transforms (depends on extract)
-- load_data.py loads to warehouse (depends on transform)
+- extract_data: src/extract.py
+- transform_data: src/transform.py [depends_on: extract_data]
+- load_data: src/load.py [depends_on: transform_data]
 ```
 
-### 3. Get Your Configuration
-Claude will generate a `databricks.yml` file ready to deploy!
+**Mermaid diagram:**
+```
+Create a DAB from this Mermaid diagram:
+flowchart TB
+    A[extract] --> B[transform]
+    B --> C[load]
+```
+
+**Workflow image:**
+```
+Parse this workflow diagram image and create a DAB
+[Attach workflow.png]
+```
+
+### 3. Get Your Project
+Claude will generate a complete project with:
+- `databricks.yml` (main configuration)
+- `resources/*.job.yml` (job definitions)
+- `src/` (source code templates)
+- `run_workflow.sh` (deployment script)
+- `README.md` (documentation)
 
 ## 📖 Documentation Guide
 

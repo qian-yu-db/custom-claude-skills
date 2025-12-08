@@ -1,3 +1,8 @@
+---
+name: langgraph-multi-agent-supervisor
+description: Build LangGraph multi-agent systems with intelligent supervisor orchestration of specialized worker agents (Genie, RAG, MCP, LLM, custom). Use when creating multi-agent systems, implementing supervisor patterns, routing queries to specialized agents, or building hierarchical/sequential/parallel agent workflows.
+---
+
 # LangGraph Multi-Agent Supervisor Skill
 
 ## Purpose

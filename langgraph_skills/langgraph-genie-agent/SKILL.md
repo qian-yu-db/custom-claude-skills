@@ -1,3 +1,8 @@
+---
+name: langgraph-genie-agent
+description: Build LangGraph agents with Databricks Genie API integration for natural language data querying. Use when creating agents that query Genie spaces, build multi-agent systems with Genie workers, or combine LangGraph orchestration with Genie's data insights. Supports single agents, multi-agent supervisors, and conversational patterns.
+---
+
 # LangGraph Genie Agent Skill
 
 ## Purpose

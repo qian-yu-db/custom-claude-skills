@@ -63,33 +63,41 @@ project-name/
 │   └── SETUP.md              # Setup instructions
 ├── src/                       # Source code
 ├── tests/                     # Tests
-├── README.md
-└── requirements.txt
+├── .python-version            # Python version (for uv)
+├── pyproject.toml             # Project metadata & dependencies
+├── uv.lock                    # Locked dependencies (uv managed)
+├── .gitignore
+└── README.md
 ```
+
+**Environment Management**: Projects use **uv** for fast, reliable Python package management.
 
 ## Available Skills
 
-The skill can integrate 12 specialized skills:
+The skill can integrate 13 specialized skills:
 
 ### Databricks Platform (4)
-- **databricks-asset-bundle-skill** - Generate DAB configurations
-- **databricks-local-notebook-skill** - Local notebook development
-- **databricks-agent-deploy2app-skill** - Deploy to Databricks Apps
-- **databricks-agent-deploy-model-serving-dab** - Deploy to Model Serving
+- **databricks-asset-bundle** - Generate DAB configurations with serverless compute, modular structure, and multiple input formats (text, Mermaid, images)
+- **databricks-local-notebook** - Local notebook development with Databricks Connect
+- **databricks-agent-deploy2app** - Deploy AI agents to Databricks Apps
+- **databricks-agent-deploy-model-serving-dab** - Deploy agents to Model Serving with serverless compute
 
 ### LangGraph Agents (4)
-- **langgraph-genie-agent** - Databricks Genie integration
-- **langgraph-unstructured-tool-agent** - RAG agents with Vector Search
+- **langgraph-genie-agent** - Databricks Genie API integration
+- **langgraph-unstructured-tool-agent** - RAG agents with Vector Search (4 patterns)
 - **langgraph-multi-agent-supervisor** - Multi-agent orchestration
 - **langgraph-mcp-tool-calling-agent** - MCP tool integration
 
 ### Python Development (2)
-- **pytest-test-creator** - Auto-generate unit tests
-- **python-code-formatter** - Code formatting
+- **pytest-test-creator** - Auto-generate unit tests with coverage
+- **python-code-formatter** - Code formatting (blackbricks + black + isort)
+
+### Planning & Visualization (1)
+- **mermaid-diagrams-creator** - Create Mermaid diagrams with automatic PNG/SVG/PDF generation
 
 ### General Purpose (2)
-- **jira-epic-creator-skill** - Generate Jira epics
-- **battle-card-creator-skill** - Competitive analysis
+- **jira-epic-creator** - Generate Jira epics
+- **battle-card-creator** - Competitive analysis
 
 ## Example Workflows
 
@@ -171,25 +179,62 @@ Claude Code automatically recommends skills based on project type:
 
 | Project Type | Recommended Skills |
 |--------------|-------------------|
-| RAG Agent | langgraph-unstructured-tool-agent, databricks-agent-deploy2app-skill |
-| Multi-Agent | langgraph-genie-agent, langgraph-multi-agent-supervisor |
-| Databricks Dev | databricks-local-notebook-skill, databricks-asset-bundle-skill |
-| Documentation | battle-card-creator-skill, jira-epic-creator-skill |
+| RAG Agent | langgraph-unstructured-tool-agent, databricks-agent-deploy2app, mermaid-diagrams-creator |
+| Multi-Agent | langgraph-genie-agent, langgraph-multi-agent-supervisor, mermaid-diagrams-creator |
+| Databricks Workflow | mermaid-diagrams-creator, databricks-asset-bundle, databricks-local-notebook |
+| Data Pipeline | databricks-asset-bundle, databricks-local-notebook, mermaid-diagrams-creator |
+| Documentation | mermaid-diagrams-creator, battle-card-creator, jira-epic-creator |
+| Architecture | mermaid-diagrams-creator, databricks-asset-bundle |
 
 ## Requirements
 
 - **Claude Code** - For executing the skill
 - **Git** - For submodule management
-- **Python 3.8+** - For generated projects
+- **Python 3.11+** - For generated projects
+- **uv** - For Python package management ([install guide](https://github.com/astral-sh/uv))
 - **custom-claude-skills** - Auto-added as submodule
+
+### Installing uv
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or with pip (if you have Python already)
+pip install uv
+```
 
 ## Best Practices
 
 1. **Start Minimal** - Begin with essential skills, add more as needed
-2. **Read Skill Docs** - Each skill has detailed documentation
-3. **Keep Docs Updated** - Regenerate after major changes
-4. **Version Control** - Commit skill submodule references
-5. **Use Claude Code** - Leverage integrated skills for development
+2. **Use uv** - Always use `uv` for package management (10-100x faster than pip)
+3. **Commit Lock Files** - Commit `pyproject.toml` and `uv.lock` for reproducibility
+4. **Read Skill Docs** - Each skill has detailed documentation
+5. **Keep Docs Updated** - Regenerate after major changes
+6. **Version Control** - Commit skill submodule references
+7. **Use Claude Code** - Leverage integrated skills for development
+
+### Common uv Commands
+
+```bash
+# Sync dependencies (after cloning)
+uv sync
+
+# Add a package
+uv add package-name
+
+# Add a dev dependency
+uv add --dev pytest
+
+# Run a command in the project environment
+uv run python src/main.py
+
+# Update dependencies
+uv lock --upgrade && uv sync
+```
 
 ## Troubleshooting
 
@@ -217,7 +262,12 @@ To add new skills to the catalog:
 
 ## Version
 
-**v1.0.0** - November 2025
+**v1.2.0** - December 2025
+
+**Changelog:**
+- v1.2.0: Use uv for Python environment management instead of pip/venv
+- v1.1.0: Added mermaid-diagrams-creator skill, updated databricks-asset-bundle with new features
+- v1.0.0: Initial release with 12 skills
 
 ## License
 

@@ -24,18 +24,19 @@ SKILLS_REPO = "https://github.com/qian-yu-db/custom-claude-skills"
 
 # Available skills catalog
 AVAILABLE_SKILLS = {
-    "databricks_platform_skills/databricks-asset-bundle-skill": "Generate DAB configurations",
-    "databricks_platform_skills/databricks-local-notebook-skill": "Local notebook development",
-    "databricks_platform_skills/databricks-agent-deploy2app-skill": "Deploy to Databricks Apps",
+    "databricks_platform_skills/databricks-asset-bundle": "Generate DAB configurations (serverless, modular, Mermaid support)",
+    "databricks_platform_skills/databricks-local-notebook": "Local notebook development",
+    "databricks_platform_skills/databricks-agent-deploy2app": "Deploy to Databricks Apps",
     "databricks_platform_skills/databricks-agent-deploy-model-serving-dab": "Deploy to Model Serving",
     "langgraph_skills/langgraph-genie-agent": "Databricks Genie integration",
-    "langgraph_skills/langgraph-unstructured-tool-agent": "RAG agents",
+    "langgraph_skills/langgraph-unstructured-tool-agent": "RAG agents (4 patterns)",
     "langgraph_skills/langgraph-multi-agent-supervisor": "Multi-agent orchestration",
     "langgraph_skills/langgraph-mcp-tool-calling-agent": "MCP tool integration",
-    "python_sklls/pytest-test-creator": "Auto-generate tests",
-    "python_sklls/python-code-formatter": "Code formatting",
-    "general_skills/jira-epic-creator-skill": "Jira epic generation",
-    "general_skills/battle-card-creator-skill": "Competitive analysis",
+    "python_sklls/pytest-test-creator": "Auto-generate tests with coverage",
+    "python_sklls/python-code-formatter": "Code formatting (blackbricks + black + isort)",
+    "develop_planning_skills/mermaid-diagrams-creator": "Create Mermaid diagrams with PNG/SVG/PDF generation",
+    "general_skills/jira-epic-creator": "Jira epic generation",
+    "general_skills/battle-card-creator": "Competitive analysis",
 }
 
 
@@ -173,11 +174,11 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
+# Virtual environments (uv creates .venv)
+.venv/
 venv/
 env/
 ENV/
-.venv
 
 # IDE
 .vscode/
@@ -210,7 +211,7 @@ tmp/
 temp/
 *.tmp
 """
-    
+
     (project_root / ".gitignore").write_text(gitignore_content)
     print("✅ Generated .gitignore")
 
@@ -227,9 +228,10 @@ def generate_readme(project_root: Path, project_name: str, skills: List[str]):
 ## Quick Start
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.11+
 - Claude Code
 - Git
+- uv ([install guide](https://github.com/astral-sh/uv))
 
 ### Installation
 
@@ -238,12 +240,24 @@ def generate_readme(project_root: Path, project_name: str, skills: List[str]):
 git clone --recurse-submodules <repo-url>
 cd {project_name}
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\\Scripts\\activate
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
-pip install -r requirements.txt
+# Sync dependencies (creates .venv and installs packages)
+uv sync
+```
+
+### Running Commands
+
+```bash
+# Run scripts in project environment
+uv run python src/main.py
+
+# Run tests
+uv run pytest
+
+# Add new dependencies
+uv add package-name
 ```
 
 ### Usage
@@ -302,10 +316,10 @@ Reference skill documentation as needed during development.
 
 ```bash
 # Run tests
-pytest
+uv run pytest
 
 # With coverage
-pytest --cov=src tests/
+uv run pytest --cov=src tests/
 ```
 
 ## License
@@ -319,16 +333,54 @@ pytest --cov=src tests/
     print("✅ Generated README.md")
 
 
-def generate_requirements_txt(project_root: Path):
-    """Generate basic requirements.txt."""
-    requirements_content = """# Core dependencies
-python-dotenv==1.0.0
+def init_uv_project(project_root: Path, project_name: str):
+    """Initialize uv project with pyproject.toml."""
+    # Run uv init in the project directory
+    result = run_command(
+        ["uv", "init", "--name", project_name, "--python", "3.11"],
+        cwd=project_root,
+        check=False
+    )
 
-# Add project-specific dependencies here
+    if result.returncode == 0:
+        print("✅ Initialized uv project (pyproject.toml, .python-version)")
+
+        # Add common dev dependencies
+        run_command(
+            ["uv", "add", "--dev", "pytest", "pytest-cov", "ruff"],
+            cwd=project_root,
+            check=False
+        )
+        print("✅ Added dev dependencies (pytest, pytest-cov, ruff)")
+    else:
+        print("⚠️  Warning: uv not found. Creating basic pyproject.toml manually.")
+        # Fallback: create basic pyproject.toml manually
+        pyproject_content = f"""[project]
+name = "{project_name}"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
 """
-    
-    (project_root / "requirements.txt").write_text(requirements_content)
-    print("✅ Generated requirements.txt")
+        (project_root / "pyproject.toml").write_text(pyproject_content)
+        (project_root / ".python-version").write_text("3.11\n")
+        print("✅ Created pyproject.toml and .python-version")
+        print("⚠️  Note: Install uv for better dependency management: https://github.com/astral-sh/uv")
 
 
 def generate_init_prompt(project_root: Path, project_name: str, skills: List[str]):
@@ -411,11 +463,15 @@ def print_summary(project_name: str, project_root: Path, skills: List[str]):
     
     print("\n📋 Next Steps:")
     print(f"   1. cd {project_name}")
-    print("   2. Review .claude/init-prompt.md")
-    print("   3. Run: claude-code chat")
-    print("   4. Paste/reference the initialization prompt")
-    print("   5. Claude Code will generate documentation and scaffolding")
-    print("\n💡 Tip: Use 'claude-code chat' to interact with your project skills")
+    print("   2. uv sync  # Sync dependencies and create .venv")
+    print("   3. Review .claude/init-prompt.md")
+    print("   4. Run: claude-code chat")
+    print("   5. Paste/reference the initialization prompt")
+    print("   6. Claude Code will generate documentation and scaffolding")
+    print("\n💡 Tips:")
+    print("   - Use 'uv run <command>' to run commands in project environment")
+    print("   - Use 'uv add <package>' to add dependencies")
+    print("   - Use 'claude-code chat' to interact with your project skills")
     print("="*60 + "\n")
 
 
@@ -474,8 +530,8 @@ def main():
         
         generate_project_context(project_root, project_name, skills)
         generate_gitignore(project_root)
+        init_uv_project(project_root, project_name)
         generate_readme(project_root, project_name, skills)
-        generate_requirements_txt(project_root)
         generate_init_prompt(project_root, project_name, skills)
         
         print_summary(project_name, project_root, skills)

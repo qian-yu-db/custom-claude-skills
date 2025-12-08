@@ -1,3 +1,8 @@
+---
+name: langgraph-unstructured-tool-agent
+description: Build RAG agents with Databricks Vector Search using LangGraph. Supports 4 RAG patterns (simple, tool-calling, multi-hop, self-query). Use when creating RAG agents, implementing semantic search, querying vector indexes, or building agents with automatic metadata filter extraction from natural language.
+---
+
 # LangGraph Unstructured Tool Agent Skill
 
 ## Purpose

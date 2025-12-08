@@ -1,3 +1,8 @@
+---
+name: langgraph-mcp-tool-calling-agent
+description: Build LangGraph agents with MCP (Model Context Protocol) tool integration for both Databricks managed MCP services and external MCP servers. Use when creating agents that need MCP tools (filesystem, git, database, web), integrating external MCP servers (SSE/stdio), or building hybrid MCP+RAG agents.
+---
+
 # LangGraph MCP Tool-Calling Agent Skill
 
 ## Purpose

@@ -1,3 +1,8 @@
+---
+name: pytest-test-creator
+description: Auto-generate comprehensive unit tests for Python codebases with pytest, coverage reports, and uv package management. Use when creating tests, setting up pytest, analyzing test coverage, or testing Databricks notebooks with local Spark. Generates fixtures, parametrized tests, mocking, and coverage reports.
+---
+
 # Pytest Test Creator Skill
 
 ## Purpose

@@ -1,3 +1,9 @@
+---
+name: databricks-agent-deploy-model-serving-dab
+description: Deploy AI agents (LangGraph, OpenAI SDK, or custom frameworks) to Databricks Model Serving using Databricks Asset Bundles (DAB). Use when deploying agents to Model Serving with infrastructure-as-code, multi-environment management (dev/staging/prod), serverless compute, and optional evaluation jobs.
+license: Apache-2.0
+---
+
 # Databricks Agent Deploy to Model Serving via DAB
 
 ## Skill Overview
