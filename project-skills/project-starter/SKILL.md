@@ -315,6 +315,51 @@ uv sync
 [License information]
 ```
 
+### Step 8 (Optional): Cross-Platform Support
+
+If user requests cross-platform compatibility (`--cross-platform` flag), generate instruction files for multiple AI coding assistants:
+
+**What gets created:**
+```
+project-name/
+├── instructions.md    # Canonical source - edit this file
+├── CLAUDE.md         # For Claude Code (auto-generated)
+├── AGENTS.md         # For Codex CLI (auto-generated)
+├── GEMINI.md         # For Gemini CLI (auto-generated)
+└── scripts/
+    └── sync_instructions.sh  # Re-generate platform files
+```
+
+**How it works:**
+1. **Merge Skills**: All selected SKILL.md files are merged into `instructions.md`
+2. **Generate CLAUDE.md**: Copy of instructions for Claude Code
+3. **Generate AGENTS.md**: Converted for Codex CLI (OpenAI)
+   - Replaces `/project:cmd` with `/prompts:cmd`
+   - Replaces `.claude/commands/` with `.codex/prompts/`
+   - Adds Codex-specific MCP configuration notes
+4. **Generate GEMINI.md**: Converted for Gemini CLI (Google)
+   - Replaces `/project:cmd` with `/cmd`
+   - Replaces `.claude/commands/` with `.gemini/commands/`
+   - Adds Gemini-specific tips and MCP configuration notes
+
+**Sync Workflow:**
+```bash
+# After editing instructions.md
+./scripts/sync_instructions.sh
+
+# Or manually:
+python .claude/skills-repo/develop_planning_skills/cross-platform-skill/scripts/convert_skill.py \
+  instructions.md --output-dir ./
+```
+
+**Platform Reference:**
+
+| Platform | Instruction File | Commands Dir | MCP Config |
+|----------|-----------------|--------------|------------|
+| Claude Code | `CLAUDE.md` | `.claude/commands/` | `.mcp.json` |
+| Codex CLI | `AGENTS.md` | `.codex/prompts/` | `~/.codex/config.toml` |
+| Gemini CLI | `GEMINI.md` | `.gemini/commands/` | `.gemini/settings.json` |
+
 ## Claude Code Commands
 
 ### Initialize New Project
@@ -642,14 +687,15 @@ custom-claude-skills/
 If repository structure changes, update the Skill Catalog section accordingly.
 
 ## Version
-- **Version**: 1.2.1
+- **Version**: 1.3.0
 - **Last Updated**: December 2025
 - **Changelog**:
+  - v1.3.0: Added cross-platform support (--cross-platform flag) for Codex CLI and Gemini CLI compatibility
   - v1.2.1: Enhanced git submodule documentation and workflow (ensures skills travel with projects)
   - v1.2.0: Use uv for Python environment management instead of pip/venv
   - v1.1.0: Added mermaid-diagrams-creator skill, updated databricks-asset-bundle description
   - v1.0.0: Initial release with 12 skills
-- **Compatible with**: Claude Code, custom-claude-skills v1.x, uv 0.1.0+
+- **Compatible with**: Claude Code, Codex CLI, Gemini CLI, custom-claude-skills v1.x, uv 0.1.0+
 
 ## Support
 For issues or questions about specific skills, refer to individual skill documentation in the custom-claude-skills repository.

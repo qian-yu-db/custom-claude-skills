@@ -10,6 +10,7 @@ The Project Starter skill enables Claude Code to:
 - 📝 Generate comprehensive documentation (PROJECT_PLAN.md, REQUIREMENTS.md)
 - 🏗️ Create initial code scaffolding appropriate for selected skills
 - ✅ Validate project setup and configuration
+- 🌐 **NEW**: Generate cross-platform instruction files for Claude Code, Codex CLI, and Gemini CLI
 
 ## Quick Start
 
@@ -46,6 +47,18 @@ User: "Add databricks-agent-deploy2app-skill to this project"
 User: "Generate project documentation"
 ```
 
+**Create project with cross-platform support:**
+```
+User: "Create a new RAG agent with cross-platform support"
+```
+
+Or via script:
+```bash
+python scripts/bootstrap_project.py my-agent \
+  langgraph_skills/langgraph-unstructured-tool-agent \
+  --cross-platform
+```
+
 ## What Gets Created
 
 When you initialize a project, you get:
@@ -63,6 +76,7 @@ project-name/
 │   └── SETUP.md              # Setup instructions
 ├── src/                       # Source code
 ├── tests/                     # Tests
+├── scripts/                   # Automation scripts
 ├── .python-version            # Python version (for uv)
 ├── pyproject.toml             # Project metadata & dependencies
 ├── uv.lock                    # Locked dependencies (uv managed)
@@ -70,11 +84,23 @@ project-name/
 └── README.md
 ```
 
+**With `--cross-platform` flag, you also get:**
+
+```
+project-name/
+├── instructions.md           # Canonical source (edit this)
+├── CLAUDE.md                 # For Claude Code
+├── AGENTS.md                 # For Codex CLI (OpenAI)
+├── GEMINI.md                 # For Gemini CLI (Google)
+└── scripts/
+    └── sync_instructions.sh  # Re-generate platform files
+```
+
 **Environment Management**: Projects use **uv** for fast, reliable Python package management.
 
 ## Available Skills
 
-The skill can integrate 13 specialized skills:
+The skill can integrate 14 specialized skills:
 
 ### Databricks Platform (4)
 - **databricks-asset-bundle** - Generate DAB configurations with serverless compute, modular structure, and multiple input formats (text, Mermaid, images)
@@ -92,8 +118,9 @@ The skill can integrate 13 specialized skills:
 - **pytest-test-creator** - Auto-generate unit tests with coverage
 - **python-code-formatter** - Code formatting (blackbricks + black + isort)
 
-### Planning & Visualization (1)
+### Planning & Visualization (2)
 - **mermaid-diagrams-creator** - Create Mermaid diagrams with automatic PNG/SVG/PDF generation
+- **cross-platform-skill** - Convert skills for Codex CLI and Gemini CLI compatibility
 
 ### General Purpose (2)
 - **jira-epic-creator** - Generate Jira epics
@@ -135,6 +162,49 @@ Claude Code:
 3. Adds langgraph-multi-agent-supervisor
 4. Generates architecture diagram
 5. Creates supervisor orchestration code
+```
+
+### Example 4: Cross-Platform Project
+```
+User: "Create a RAG agent project with cross-platform support"
+
+Claude Code:
+1. Creates project structure
+2. Adds langgraph-unstructured-tool-agent skill
+3. Generates merged instructions.md from all skills
+4. Creates CLAUDE.md (Claude Code)
+5. Creates AGENTS.md (Codex CLI)
+6. Creates GEMINI.md (Gemini CLI)
+7. Creates sync_instructions.sh for updates
+```
+
+## Cross-Platform Support
+
+Projects can be made compatible with multiple AI coding assistants:
+
+| Platform | File | Description |
+|----------|------|-------------|
+| Claude Code | `CLAUDE.md` | Primary instruction file |
+| Codex CLI | `AGENTS.md` | OpenAI's CLI tool |
+| Gemini CLI | `GEMINI.md` | Google's CLI tool |
+
+### How It Works
+
+1. **Merge**: Selected skills' SKILL.md files are merged into `instructions.md`
+2. **Convert**: Platform-specific adaptations are applied:
+   - Slash command syntax differences
+   - MCP configuration format differences
+   - Platform-specific tips
+3. **Sync**: Use `scripts/sync_instructions.sh` after editing `instructions.md`
+
+### Sync Workflow
+
+```bash
+# Edit the canonical source
+vim instructions.md
+
+# Regenerate platform files
+./scripts/sync_instructions.sh
 ```
 
 ## Commands
@@ -343,9 +413,10 @@ To add new skills to the catalog:
 
 ## Version
 
-**v1.2.1** - December 2025
+**v1.3.0** - December 2025
 
 **Changelog:**
+- v1.3.0: Added cross-platform support (`--cross-platform` flag) for Codex CLI and Gemini CLI compatibility
 - v1.2.1: Enhanced git submodule documentation and workflow (ensures skills travel with projects)
 - v1.2.0: Use uv for Python environment management instead of pip/venv
 - v1.1.0: Added mermaid-diagrams-creator skill, updated databricks-asset-bundle with new features

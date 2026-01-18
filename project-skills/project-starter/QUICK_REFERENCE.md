@@ -60,6 +60,41 @@ User: "Check if everything is configured correctly"
 
 ---
 
+### Create Cross-Platform Project
+```
+User: "Create a new project with cross-platform support"
+User: "Bootstrap project for Claude Code, Codex, and Gemini"
+```
+
+**Script usage:**
+```bash
+python scripts/bootstrap_project.py my-agent \
+  langgraph_skills/langgraph-genie-agent \
+  --cross-platform
+```
+
+**Claude Code will:**
+- Create standard project structure
+- Merge selected skills into `instructions.md`
+- Generate `CLAUDE.md` (Claude Code)
+- Generate `AGENTS.md` (Codex CLI)
+- Generate `GEMINI.md` (Gemini CLI)
+- Create `scripts/sync_instructions.sh`
+
+---
+
+### Sync Cross-Platform Files
+```bash
+# After editing instructions.md
+./scripts/sync_instructions.sh
+
+# Or manually
+python .claude/skills-repo/develop_planning_skills/cross-platform-skill/scripts/convert_skill.py \
+  instructions.md --output-dir ./
+```
+
+---
+
 ## Skill Selection Guide
 
 ### By Project Type
@@ -185,6 +220,17 @@ project-name/
 7. Use in documentation and presentations
 ```
 
+### Workflow 6: Cross-Platform Agent Project
+```bash
+1. "Create a new RAG agent with cross-platform support"
+2. Select skills: langgraph-unstructured-tool-agent
+3. Claude merges skills into instructions.md
+4. Claude generates CLAUDE.md, AGENTS.md, GEMINI.md
+5. Edit instructions.md as canonical source
+6. Run ./scripts/sync_instructions.sh to regenerate
+7. Project works with Claude Code, Codex CLI, and Gemini CLI
+```
+
 ---
 
 ## Available Skills Quick List
@@ -205,8 +251,9 @@ project-name/
 - `pytest-test-creator` - Auto-generate tests
 - `python-code-formatter` - Code formatting
 
-### Planning & Visualization (1 skill)
+### Planning & Visualization (2 skills)
 - `mermaid-diagrams-creator` - Create diagrams with PNG/SVG/PDF generation
+- `cross-platform-skill` - Convert skills for Codex CLI and Gemini CLI
 
 ### General (2 skills)
 - `jira-epic-creator` - Jira epic generation
@@ -344,10 +391,37 @@ uv sync
 
 ---
 
+## Cross-Platform Reference
+
+### File Mapping
+
+| Platform | Instruction File | Slash Commands | MCP Config |
+|----------|-----------------|----------------|------------|
+| Claude Code | `CLAUDE.md` | `.claude/commands/` | `.mcp.json` |
+| Codex CLI | `AGENTS.md` | `.codex/prompts/` | `~/.codex/config.toml` |
+| Gemini CLI | `GEMINI.md` | `.gemini/commands/` | `.gemini/settings.json` |
+
+### Sync Workflow
+
+```bash
+# 1. Edit canonical source
+vim instructions.md
+
+# 2. Regenerate platform files
+./scripts/sync_instructions.sh
+
+# 3. Commit all files
+git add instructions.md CLAUDE.md AGENTS.md GEMINI.md
+git commit -m "Update instructions"
+```
+
+---
+
 ## Version
-**v1.2.0** - December 2025
+**v1.3.0** - December 2025
 
 **Updates:**
+- v1.3.0: Added cross-platform support (`--cross-platform` flag)
 - v1.2.0: Use uv for Python environment management
 - v1.1.0: Added mermaid-diagrams-creator skill, updated databricks-asset-bundle
 - v1.0.0: Initial release

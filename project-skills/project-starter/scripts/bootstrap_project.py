@@ -4,20 +4,26 @@ Bootstrap Project Script
 Creates a new project with selected Claude skills from custom-claude-skills repository.
 
 Usage:
-    python bootstrap_project.py <project-name> [skill1] [skill2] ...
+    python bootstrap_project.py <project-name> [skill1] [skill2] ... [--cross-platform]
 
 Example:
     python bootstrap_project.py my-rag-agent \\
         langgraph_skills/langgraph-unstructured-tool-agent \\
-        databricks_platform_skills/databricks-agent-deploy2app-skill
+        databricks_platform_skills/databricks-agent-deploy2app \\
+        --cross-platform
+
+Cross-Platform Support:
+    Use --cross-platform flag to generate CLAUDE.md, AGENTS.md (Codex), and GEMINI.md
+    from selected skills. This makes your project work with Claude Code, Codex CLI, and Gemini CLI.
 """
 
 import os
 import sys
 import subprocess
+import re
 from pathlib import Path
 from datetime import datetime
-from typing import List
+from typing import List, Tuple, Dict
 
 # Skills repository
 SKILLS_REPO = "https://github.com/qian-yu-db/custom-claude-skills"
@@ -35,8 +41,26 @@ AVAILABLE_SKILLS = {
     "python_sklls/pytest-test-creator": "Auto-generate tests with coverage",
     "python_sklls/python-code-formatter": "Code formatting (blackbricks + black + isort)",
     "develop_planning_skills/mermaid-diagrams-creator": "Create Mermaid diagrams with PNG/SVG/PDF generation",
+    "develop_planning_skills/cross-platform-skill": "Convert skills for Codex CLI and Gemini CLI",
     "general_skills/jira-epic-creator": "Jira epic generation",
     "general_skills/battle-card-creator": "Competitive analysis",
+}
+
+# Cross-platform conversion mappings
+CLAUDE_TO_CODEX = {
+    r'/project:(\w+)': r'/prompts:\1',
+    r'\.claude/commands/': '.codex/prompts/',
+    r'\.mcp\.json': '~/.codex/config.toml (mcp_servers section)',
+    r'Claude Code': 'Codex CLI',
+    r'claude code': 'Codex CLI',
+}
+
+CLAUDE_TO_GEMINI = {
+    r'/project:(\w+)': r'/\1',
+    r'\.claude/commands/': '.gemini/commands/',
+    r'\.mcp\.json': '.gemini/settings.json (mcpServers section)',
+    r'Claude Code': 'Gemini CLI',
+    r'claude code': 'Gemini CLI',
 }
 
 
@@ -469,7 +493,183 @@ Please complete the following initialization tasks:
     print("✅ Generated initialization prompt")
 
 
-def print_summary(project_name: str, project_root: Path, skills: List[str]):
+def extract_frontmatter(content: str) -> Tuple[Dict[str, str], str]:
+    """Extract YAML frontmatter from markdown content."""
+    frontmatter = {}
+    body = content
+
+    if content.startswith('---'):
+        parts = content.split('---', 2)
+        if len(parts) >= 3:
+            for line in parts[1].strip().split('\n'):
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    frontmatter[key.strip()] = value.strip()
+            body = parts[2].strip()
+
+    return frontmatter, body
+
+
+def apply_replacements(content: str, replacements: Dict[str, str]) -> str:
+    """Apply regex replacements to content."""
+    result = content
+    for pattern, replacement in replacements.items():
+        result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+    return result
+
+
+def merge_skill_files(project_root: Path, skills: List[str], project_name: str) -> str:
+    """Merge selected skills' SKILL.md files into a unified instruction document."""
+    merged_content = f"""# {project_name} - Project Instructions
+
+This document combines instructions from all selected skills for this project.
+Use this as your guide when working with Claude Code, Codex CLI, or Gemini CLI.
+
+---
+
+"""
+
+    for skill_path in skills:
+        skill_name = Path(skill_path).name
+        skill_md_path = project_root / ".claude/skills-repo" / skill_path / "SKILL.md"
+
+        if skill_md_path.exists():
+            content = skill_md_path.read_text()
+            _, body = extract_frontmatter(content)
+
+            merged_content += f"\n## Skill: {skill_name}\n\n"
+            merged_content += f"*Source: `{skill_path}/SKILL.md`*\n\n"
+            merged_content += body
+            merged_content += "\n\n---\n"
+        else:
+            merged_content += f"\n## Skill: {skill_name}\n\n"
+            merged_content += f"*Note: SKILL.md not found at {skill_path}*\n\n---\n"
+
+    return merged_content
+
+
+def convert_to_codex(content: str, source_name: str) -> str:
+    """Convert Claude instructions to Codex CLI format."""
+    _, body = extract_frontmatter(content)
+    converted = apply_replacements(body, CLAUDE_TO_CODEX)
+
+    # Add MCP configuration note if MCP is mentioned
+    if 'mcp' in content.lower():
+        mcp_note = """> **Codex CLI MCP Configuration**: Configure MCP servers in `~/.codex/config.toml`:
+> ```toml
+> [mcp_servers.my-server]
+> command = "npx"
+> args = ["-y", "@my/mcp-server"]
+> ```
+
+"""
+        converted = mcp_note + converted
+
+    header = f"<!-- Generated from {source_name} for Codex CLI -->\n"
+    header += "<!-- Keep in sync with instructions.md -->\n\n"
+    return header + converted
+
+
+def convert_to_gemini(content: str, source_name: str) -> str:
+    """Convert Claude instructions to Gemini CLI format."""
+    _, body = extract_frontmatter(content)
+    converted = apply_replacements(body, CLAUDE_TO_GEMINI)
+
+    # Add MCP configuration note if MCP is mentioned
+    if 'mcp' in content.lower():
+        mcp_note = """> **Gemini CLI MCP Configuration**: Configure MCP servers in `.gemini/settings.json`:
+> ```json
+> {
+>   "mcpServers": {
+>     "my-server": {
+>       "command": "npx",
+>       "args": ["-y", "@my/mcp-server"]
+>     }
+>   }
+> }
+> ```
+
+"""
+        converted = mcp_note + converted
+
+    # Add Gemini-specific tip
+    memory_tip = "> **Tip**: Use `/memory add <instruction>` to add rules to your global GEMINI.md on the fly.\n\n"
+    converted = memory_tip + converted
+
+    header = f"<!-- Generated from {source_name} for Gemini CLI -->\n"
+    header += "<!-- Keep in sync with instructions.md -->\n\n"
+    return header + converted
+
+
+def generate_cross_platform_files(project_root: Path, project_name: str, skills: List[str]):
+    """Generate cross-platform instruction files (CLAUDE.md, AGENTS.md, GEMINI.md)."""
+    if not skills:
+        print("⚠️  No skills selected - skipping cross-platform generation")
+        return
+
+    print("\n📦 Generating cross-platform instruction files...")
+
+    # Step 1: Merge all skill files into unified instructions
+    merged_content = merge_skill_files(project_root, skills, project_name)
+    instructions_path = project_root / "instructions.md"
+    instructions_path.write_text(merged_content)
+    print("  ✅ Created instructions.md (canonical source)")
+
+    # Step 2: Generate CLAUDE.md (for Claude Code)
+    _, body = extract_frontmatter(merged_content)
+    claude_content = f"<!-- Generated from instructions.md for Claude Code -->\n"
+    claude_content += f"<!-- This is the canonical instruction file for this project -->\n\n"
+    claude_content += body
+    (project_root / "CLAUDE.md").write_text(claude_content)
+    print("  ✅ Created CLAUDE.md (Claude Code)")
+
+    # Step 3: Generate AGENTS.md (for Codex CLI)
+    codex_content = convert_to_codex(merged_content, "instructions.md")
+    (project_root / "AGENTS.md").write_text(codex_content)
+    print("  ✅ Created AGENTS.md (Codex CLI)")
+
+    # Step 4: Generate GEMINI.md (for Gemini CLI)
+    gemini_content = convert_to_gemini(merged_content, "instructions.md")
+    (project_root / "GEMINI.md").write_text(gemini_content)
+    print("  ✅ Created GEMINI.md (Gemini CLI)")
+
+    # Step 5: Create sync script for future updates
+    sync_script = """#!/bin/bash
+# Sync cross-platform instruction files from instructions.md
+# Run this after updating instructions.md
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+echo "Syncing cross-platform instruction files..."
+
+# Check if instructions.md exists
+if [ ! -f "$PROJECT_ROOT/instructions.md" ]; then
+    echo "Error: instructions.md not found"
+    exit 1
+fi
+
+# Use the convert_skill.py from skills-repo if available
+CONVERTER="$PROJECT_ROOT/.claude/skills-repo/develop_planning_skills/cross-platform-skill/scripts/convert_skill.py"
+
+if [ -f "$CONVERTER" ]; then
+    python "$CONVERTER" "$PROJECT_ROOT/instructions.md" --output-dir "$PROJECT_ROOT"
+    echo "✅ Sync complete using cross-platform-skill converter"
+else
+    echo "⚠️  Converter not found. Manual sync required."
+    echo "   Run: python .claude/skills-repo/develop_planning_skills/cross-platform-skill/scripts/convert_skill.py instructions.md"
+fi
+"""
+    sync_path = project_root / "scripts/sync_instructions.sh"
+    sync_path.write_text(sync_script)
+    sync_path.chmod(0o755)
+    print("  ✅ Created scripts/sync_instructions.sh")
+
+    print("\n✅ Cross-platform files generated!")
+    print("   Your project now works with Claude Code, Codex CLI, and Gemini CLI")
+
+
+def print_summary(project_name: str, project_root: Path, skills: List[str], cross_platform: bool = False):
     """Print summary and next steps."""
     print("\n" + "="*60)
     print(f"🎉 Project '{project_name}' created successfully!")
@@ -495,30 +695,54 @@ def print_summary(project_name: str, project_root: Path, skills: List[str]):
     print("   - Others can clone with: git clone --recurse-submodules <repo-url>")
     print("   - If they forgot: git submodule update --init --recursive")
 
+    if cross_platform:
+        print("\n🌐 Cross-Platform Support:")
+        print("   - CLAUDE.md    → Claude Code")
+        print("   - AGENTS.md    → Codex CLI (OpenAI)")
+        print("   - GEMINI.md    → Gemini CLI (Google)")
+        print("   - instructions.md → Canonical source (edit this, then sync)")
+        print("   - scripts/sync_instructions.sh → Re-generate platform files")
+
     print("\n💡 Tips:")
     print("   - Use 'uv run <command>' to run commands in project environment")
     print("   - Use 'uv add <package>' to add dependencies")
     print("   - Use 'claude-code chat' to interact with your project skills")
     print("   - The .gitmodules file tracks the skills repo - don't delete it!")
+    if cross_platform:
+        print("   - After editing instructions.md, run: ./scripts/sync_instructions.sh")
     print("="*60 + "\n")
 
 
 def main():
     """Main execution function."""
     if len(sys.argv) < 2:
-        print("Usage: python bootstrap_project.py <project-name> [skill1] [skill2] ...")
+        print("Usage: python bootstrap_project.py <project-name> [skill1] [skill2] ... [--cross-platform]")
+        print("\nOptions:")
+        print("  --cross-platform    Generate CLAUDE.md, AGENTS.md, GEMINI.md from selected skills")
         print("\nAvailable skills:")
         for skill_path, desc in AVAILABLE_SKILLS.items():
             print(f"  {skill_path}")
             print(f"    {desc}")
-        print("\nExample:")
+        print("\nExamples:")
+        print("  # Basic project:")
         print("  python bootstrap_project.py my-agent \\")
         print("    langgraph_skills/langgraph-genie-agent \\")
-        print("    databricks_platform_skills/databricks-asset-bundle-skill")
+        print("    databricks_platform_skills/databricks-asset-bundle")
+        print()
+        print("  # With cross-platform support:")
+        print("  python bootstrap_project.py my-agent \\")
+        print("    langgraph_skills/langgraph-genie-agent \\")
+        print("    --cross-platform")
         sys.exit(1)
-    
-    project_name = sys.argv[1]
-    skills = sys.argv[2:] if len(sys.argv) > 2 else []
+
+    # Parse arguments
+    args = sys.argv[1:]
+    cross_platform = "--cross-platform" in args
+    if cross_platform:
+        args.remove("--cross-platform")
+
+    project_name = args[0]
+    skills = args[1:] if len(args) > 1 else []
     
     # Validate project name
     if not project_name.replace("-", "").replace("_", "").isalnum():
@@ -544,26 +768,32 @@ def main():
         print(f"Skills: {len(skills)} selected")
     else:
         print("⚠️  No skills selected - you can add them later")
+    if cross_platform:
+        print("Cross-platform: ✅ Enabled (will generate CLAUDE.md, AGENTS.md, GEMINI.md)")
     print()
-    
+
     try:
         # Create project
         project_root.mkdir(parents=True)
         create_directory_structure(project_root)
         initialize_git(project_root)
         add_skills_submodule(project_root)
-        
+
         if skills:
             link_skills(project_root, skills)
-        
+
         generate_project_context(project_root, project_name, skills)
         generate_gitignore(project_root)
         init_uv_project(project_root, project_name)
         generate_readme(project_root, project_name, skills)
         generate_init_prompt(project_root, project_name, skills)
-        
-        print_summary(project_name, project_root, skills)
-        
+
+        # Generate cross-platform files if requested
+        if cross_platform:
+            generate_cross_platform_files(project_root, project_name, skills)
+
+        print_summary(project_name, project_root, skills, cross_platform)
+
     except Exception as e:
         print(f"\n❌ Error during project creation: {e}")
         print(f"You may need to manually clean up: {project_root}")

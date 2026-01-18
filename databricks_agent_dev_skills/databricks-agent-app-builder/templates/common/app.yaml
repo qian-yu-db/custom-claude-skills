@@ -1,0 +1,22 @@
+# Databricks Apps configuration
+# For backend-only deployment
+command: ["uv", "run", "start-server"]
+
+# For deployment with frontend, use:
+# command: ["uv", "run", "start-app"]
+
+env:
+  - name: MLFLOW_TRACKING_URI
+    value: "databricks"
+  - name: MLFLOW_REGISTRY_URI
+    value: "databricks-uc"
+  - name: MLFLOW_EXPERIMENT_ID
+    valueFrom: experiment
+
+# Additional env vars for frontend (uncomment if using start-app)
+#  - name: API_PROXY
+#    value: "http://localhost:8000/invocations"
+#  - name: CHAT_APP_PORT
+#    value: "3000"
+#  - name: CHAT_PROXY_TIMEOUT_SECONDS
+#    value: "600"

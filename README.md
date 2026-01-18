@@ -4,23 +4,22 @@ A curated collection of specialized skills for Claude Code to enhance productivi
 
 ## Overview
 
-This repository contains 15 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
+This repository contains 14 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
 
 ## Available Skills
 
-### Databricks Platform Skills (4)
+### Databricks Agent Development Skills (5)
+
+1. **[databricks-agent-app-builder](databricks_agent_dev_skills/databricks-agent-app-builder/)** - Generate complete Databricks App projects with MLflow agent server for LangGraph, OpenAI Agents SDK, or non-conversational agents
+2. **[databricks-agent-deploy-model-serving-dab](databricks_agent_dev_skills/databricks-agent-deploy-model-serving-dab/)** - Deploy agents (LangGraph, OpenAI SDK, custom) to Model Serving using Databricks Asset Bundles with serverless compute
+3. **[langgraph-mcp-tool](databricks_agent_dev_skills/langgraph-mcp-tool/)** - Create LangChain-compatible tools from Databricks MCP servers (managed and external) for use in any AI agent framework
+4. **[langgraph-multi-agent-supervisor](databricks_agent_dev_skills/langgraph-multi-agent-supervisor/)** - Build multi-agent systems with intelligent supervisor orchestration of specialized worker agents
+5. **[langgraph-structured-unstructured-tool](databricks_agent_dev_skills/langgraph-structured-unstructured-tool/)** - Set up Databricks retrieval tools using VectorSearchRetrieverTool (RAG) and GenieAgent (SQL)
+
+### Databricks Platform Skills (2)
 
 1. **[databricks-asset-bundle](databricks_platform_skills/databricks-asset-bundle/)** - Generate Databricks Asset Bundle configurations with serverless compute, modular structure, and multiple input formats (text, Mermaid diagrams, workflow images)
 2. **[databricks-local-notebook](databricks_platform_skills/databricks-local-notebook/)** - Create Databricks notebooks with local IDE development support via Databricks Connect
-3. **[databricks-agent-deploy2app](databricks_platform_skills/databricks-agent-deploy2app/)** - Deploy AI agents to Databricks Apps with complete infrastructure setup
-4. **[databricks-agent-deploy-model-serving-dab](databricks_platform_skills/databricks-agent-deploy-model-serving-dab/)** - Deploy agents (LangGraph, OpenAI, custom) to Model Serving using Databricks Asset Bundles with serverless compute
-
-### LangGraph Skills (4)
-
-1. **[langgraph-genie-agent](langgraph_skills/langgraph-genie-agent/)** - Build LangGraph agents with Databricks Genie API for natural language data querying
-2. **[langgraph-unstructured-tool-agent](langgraph_skills/langgraph-unstructured-tool-agent/)** - Build RAG agents with Databricks Vector Search (4 patterns: simple, tool-calling, multi-hop, self-query)
-3. **[langgraph-multi-agent-supervisor](langgraph_skills/langgraph-multi-agent-supervisor/)** - Build multi-agent systems with intelligent supervisor orchestration
-4. **[langgraph-mcp-tool-calling-agent](langgraph_skills/langgraph-mcp-tool-calling-agent/)** - Build agents with Model Context Protocol (MCP) tool integration
 
 ### Python Skills (2)
 
@@ -45,8 +44,8 @@ This repository contains 15 custom skills organized by domain. Each skill provid
 
 ```
 custom-claude-skills/
-├── databricks_platform_skills/    # 4 Databricks skills
-├── langgraph_skills/              # 4 LangGraph agent skills
+├── databricks_agent_dev_skills/   # 5 Agent development skills
+├── databricks_platform_skills/    # 2 Databricks platform skills
 ├── python_sklls/                  # 2 Python development skills
 ├── develop_planning_skills/       # 2 Planning & visualization skills
 ├── project-skills/                # 1 Project bootstrapping skill
@@ -86,15 +85,14 @@ mermaid-diagrams-creator → databricks-asset-bundle → databricks-agent-deploy
 
 **Databricks Development**:
 ```bash
-# Create a notebook → orchestrate with DAB → deploy to Apps or Model Serving
-databricks-local-notebook → databricks-asset-bundle → databricks-agent-deploy2app
-                                                     → databricks-agent-deploy-model-serving-dab
+# Create a notebook → orchestrate with DAB → deploy to Model Serving
+databricks-local-notebook → databricks-asset-bundle → databricks-agent-deploy-model-serving-dab
 ```
 
 **LangGraph Agent Development**:
 ```bash
-# Build specialized agents → combine with supervisor
-langgraph-genie-agent + langgraph-unstructured-tool-agent → langgraph-multi-agent-supervisor
+# Set up retrieval tools → combine with supervisor
+langgraph-structured-unstructured-tool + langgraph-mcp-tool → langgraph-multi-agent-supervisor
 ```
 
 **Python Development**:
@@ -133,18 +131,23 @@ Apache-2.0
 
 ## Version
 
-**v1.2.1** - December 2025
+**v1.3.0** - January 2026
 
 ### Recent Updates
 
-**v1.2.1** (December 7, 2025):
-- 🔧 **Fixed mermaid-diagrams-creator**: Made image generation **mandatory** - now always creates both .mermaid source AND PNG/SVG/PDF images
-- ✨ **Enhanced project-starter** to v1.2.1: Improved git submodule workflow with comprehensive documentation for cloning projects with skills intact
+**v1.3.0** (January 2026):
+- 🔄 **Reorganized skill structure**: Consolidated agent development skills into `databricks_agent_dev_skills/` directory
+- ✨ **Added databricks-agent-app-builder**: Generate complete Databricks App projects with MLflow agent server
+- 🔧 **Renamed langgraph-mcp-tool-calling-agent** to **langgraph-mcp-tool**: Focused on tool creation from MCP servers
+- 🔧 **Renamed langgraph-unstructured-tool-agent** to **langgraph-structured-unstructured-tool**: Combined Vector Search and Genie tools
+- 📝 **Added CLAUDE.md**: Project guidance for Claude Code instances
+- Total skills: 15 → 14 (consolidated and streamlined)
+
+**v1.2.1** (December 2025):
+- Fixed mermaid-diagrams-creator: Made image generation mandatory
+- Enhanced project-starter with improved git submodule workflow
 
 **v1.2.0** (December 2025):
-- Added **mermaid-diagrams-creator** skill with automatic image generation (PNG/SVG/PDF)
-- Added **cross-platform-skill** for Codex CLI and Gemini CLI compatibility
-- Enhanced **databricks-asset-bundle** with serverless compute, Mermaid diagram support, and visual workflow parsing
-- Updated **project-starter** to v1.2.0 with uv package management (10-100x faster than pip)
-- Added YAML frontmatter to all 15 skills for better discoverability
-- Total skills: 13 → 15
+- Added mermaid-diagrams-creator and cross-platform-skill
+- Enhanced databricks-asset-bundle with serverless compute and Mermaid support
+- Added YAML frontmatter to all skills
