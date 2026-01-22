@@ -9,6 +9,7 @@ This skill creates production-ready agent applications that deploy to Databricks
 - **FastAPI + Uvicorn** backend
 - **MCP tool integration** for Unity Catalog functions, Vector Search, and Genie
 - **Parameterized deployment scripts** for easy CI/CD
+- **Optional Frontend** - Production chat UI via sparse checkout from `app-templates` repo
 
 ## Supported Frameworks
 
@@ -31,6 +32,7 @@ This skill creates production-ready agent applications that deploy to Databricks
 # 2. Framework (LangGraph / OpenAI Agents SDK)
 # 3. Project name
 # 4. Agent description
+# 5. Frontend (optional - production chat UI via sparse checkout)
 ```
 
 ### Project Structure

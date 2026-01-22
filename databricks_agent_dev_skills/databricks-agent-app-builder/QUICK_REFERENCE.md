@@ -72,15 +72,53 @@ curl -X POST <app-url>/invocations \
 ## Environment Variables
 
 ```bash
-# .env.local
+# .env.local (backend agent)
 DATABRICKS_CONFIG_PROFILE=DEFAULT          # Or use HOST/TOKEN
 MLFLOW_EXPERIMENT_ID=<experiment-id>       # Required
 MLFLOW_TRACKING_URI="databricks"
 MLFLOW_REGISTRY_URI="databricks-uc"
+```
 
-# For frontend (optional)
-API_PROXY=http://localhost:8000/invocations
-CHAT_APP_PORT=3000
+## Frontend Setup (Optional)
+
+For conversational agents that need a production chat UI:
+
+```bash
+# Sparse checkout frontend from app-templates repo
+git clone --filter=blob:none --sparse https://github.com/databricks/app-templates.git temp-clone
+cd temp-clone
+git sparse-checkout set agent-langgraph/e2e-chatbot-app-next
+mv agent-langgraph/e2e-chatbot-app-next ../my-agent-frontend
+cd .. && rm -rf temp-clone
+
+# Setup and run frontend
+cd my-agent-frontend
+./scripts/quickstart.sh     # Interactive setup (recommended)
+# OR
+npm install && npm run dev  # Manual setup (localhost:3000)
+```
+
+### Frontend Environment Variables
+
+```bash
+# .env.local (frontend)
+DATABRICKS_CONFIG_PROFILE=DEFAULT
+DATABRICKS_SERVING_ENDPOINT=my-agent-endpoint  # Your deployed agent
+
+# Optional: Database for persistent chat history
+PGUSER=your-databricks-username
+PGHOST=your-lakebase-host
+PGDATABASE=databricks_postgres
+PGPORT=5432
+```
+
+### Frontend Deployment
+
+```bash
+cd my-agent-frontend
+databricks bundle validate
+databricks bundle deploy
+databricks bundle run databricks_chatbot
 ```
 
 ## Key Files

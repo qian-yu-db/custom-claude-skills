@@ -39,6 +39,10 @@ Ask the user these questions to determine the project configuration:
 4. **Agent Description**: "Briefly describe what your agent does"
    - Used for instructions and documentation
 
+5. **Frontend** (if conversational): "Do you want a production chat UI frontend?"
+   - **Yes**: Will sparse checkout `e2e-chatbot-app-next` from app-templates repo
+   - **No**: API-only deployment (can add frontend later)
+
 ### Step 2: Generate Project Structure
 
 Based on user selections, generate the following structure:
@@ -67,6 +71,128 @@ Use the templates in `templates/` directory as reference. Customize based on:
 - Framework selection (LangGraph / OpenAI Agents SDK / Non-Conversational)
 - Agent description and purpose
 - Project name
+
+### Step 4: Setup Frontend (Optional)
+
+If the user requested a frontend for conversational agents, set it up via sparse checkout:
+
+#### 4.1 Sparse Checkout Frontend
+
+```bash
+# Create a temporary clone with sparse checkout
+git clone --filter=blob:none --sparse https://github.com/databricks/app-templates.git temp-app-templates
+cd temp-app-templates
+git sparse-checkout set agent-langgraph/e2e-chatbot-app-next
+
+# Move frontend to sibling directory
+mv agent-langgraph/e2e-chatbot-app-next ../{project-name}-frontend
+cd ..
+rm -rf temp-app-templates
+```
+
+#### 4.2 Configure Frontend
+
+After checkout, configure the frontend to connect to the agent:
+
+```bash
+cd {project-name}-frontend
+
+# Create .env.local with agent endpoint
+cat > .env.local << 'EOF'
+# Databricks Authentication
+DATABRICKS_CONFIG_PROFILE=DEFAULT
+
+# Agent Serving Endpoint (created by deploying the backend agent)
+DATABRICKS_SERVING_ENDPOINT={agent-endpoint-name}
+
+# Database (optional - for persistent chat history)
+# Uncomment and configure if using Lakebase
+# PGUSER=your-databricks-username
+# PGHOST=your-lakebase-host
+# PGDATABASE=databricks_postgres
+# PGPORT=5432
+EOF
+```
+
+#### 4.3 Frontend Project Structure
+
+The frontend is a production-ready full-stack application:
+
+```
+{project-name}-frontend/
+├── client/                 # React + Vite frontend
+├── server/                 # Express.js backend (BFF)
+├── packages/               # Shared libraries
+│   ├── core/              # Domain types, errors
+│   ├── auth/              # Authentication utilities
+│   ├── ai-sdk-providers/  # Databricks AI SDK integration
+│   ├── db/                # Database layer (Drizzle ORM)
+│   └── utils/             # Shared utilities
+├── scripts/
+│   ├── quickstart.sh      # Interactive setup wizard
+│   └── start-app.sh       # Start development server
+├── databricks.yml         # Asset Bundle configuration
+└── package.json           # npm workspaces monorepo
+```
+
+#### 4.4 Frontend Setup Options
+
+**Option A: Interactive Setup (Recommended)**
+```bash
+cd {project-name}-frontend
+./scripts/quickstart.sh
+```
+
+The quickstart script will:
+- Install prerequisites (Node.js 20, Databricks CLI)
+- Configure authentication
+- Set up serving endpoint
+- Optionally configure database for persistent chat history
+- Deploy to Databricks (optional)
+
+**Option B: Manual Setup**
+```bash
+cd {project-name}-frontend
+npm install
+npm run dev  # Starts on localhost:3000 (frontend) and localhost:3001 (backend)
+```
+
+#### 4.5 Frontend Deployment
+
+The frontend deploys separately via Databricks Asset Bundle:
+
+```bash
+cd {project-name}-frontend
+
+# Update databricks.yml with your endpoint name
+# Then deploy:
+databricks bundle validate
+databricks bundle deploy
+databricks bundle run databricks_chatbot
+```
+
+#### 4.6 Final Directory Structure
+
+After setup, you'll have two sibling directories:
+
+```
+workspace/
+├── {project-name}/           # Backend agent (Python/MLflow)
+│   ├── agent_server/
+│   ├── app.yaml
+│   └── pyproject.toml
+│
+└── {project-name}-frontend/  # Chat UI (TypeScript/React)
+    ├── client/
+    ├── server/
+    ├── databricks.yml
+    └── package.json
+```
+
+This separation allows:
+- Independent deployment cycles
+- Different tech stacks (Python vs Node.js)
+- Separate scaling and resource management
 
 ## Code Generation Rules
 
@@ -327,21 +453,36 @@ curl -X POST <app-url>/invocations \
 
 ## Frontend Integration
 
-For conversational agents that need a chat UI, reference the `e2e-chatbot-app-next` frontend:
+For conversational agents that need a chat UI, see **Step 4: Setup Frontend (Optional)** above.
 
-1. Clone from: `https://github.com/databricks/app-templates`
-2. Located in: `agent-langgraph/e2e-chatbot-app-next/`
-3. Tech stack: Next.js + React + Tailwind CSS
-4. Requires: Node.js 20+
+**Quick Summary:**
+- Source: `https://github.com/databricks/app-templates` → `agent-langgraph/e2e-chatbot-app-next/`
+- Tech stack: React + Vite + Express.js + TypeScript + Tailwind CSS
+- Requires: Node.js 20+, npm 8+
+- Features:
+  - Persistent chat history (optional, requires Lakebase)
+  - Databricks authentication
+  - Streaming responses via Vercel AI SDK
+  - Databricks Asset Bundle deployment
 
-Update `app.yaml` for frontend:
-```yaml
-command: ["uv", "run", "start-app"]
-env:
-  - name: API_PROXY
-    value: "http://localhost:8000/invocations"
-  - name: CHAT_APP_PORT
-    value: "3000"
+**Adding Frontend Later:**
+
+If the user initially chose API-only and wants to add frontend later:
+
+```bash
+# Navigate to parent of your agent project
+cd /path/to/workspace
+
+# Sparse checkout the frontend
+git clone --filter=blob:none --sparse https://github.com/databricks/app-templates.git temp-clone
+cd temp-clone
+git sparse-checkout set agent-langgraph/e2e-chatbot-app-next
+mv agent-langgraph/e2e-chatbot-app-next ../my-agent-frontend
+cd .. && rm -rf temp-clone
+
+# Configure and run
+cd my-agent-frontend
+./scripts/quickstart.sh
 ```
 
 ## Reference Documentation
