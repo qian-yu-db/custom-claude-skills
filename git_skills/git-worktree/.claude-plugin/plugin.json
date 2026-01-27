@@ -1,0 +1,8 @@
+{
+  "name": "git-worktree",
+  "description": "Manage git worktrees with smart automation - create with auto-setup, list with merge status, clean up stale worktrees",
+  "version": "1.0.0",
+  "author": {
+    "name": "Custom Skills"
+  }
+}

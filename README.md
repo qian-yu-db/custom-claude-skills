@@ -4,7 +4,9 @@ A curated collection of specialized skills for Claude Code to enhance productivi
 
 ## Overview
 
-This repository contains 14 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
+This repository contains 15 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
+
+For guidance on converting skills to plugins, see [SKILLS_VS_PLUGINS.md](SKILLS_VS_PLUGINS.md).
 
 ## Available Skills
 
@@ -40,6 +42,23 @@ This repository contains 14 custom skills organized by domain. Each skill provid
 1. **[jira-epic-creator](general_skills/jira-epic-creator/)** - Transform documents into structured Jira epics with comprehensive user stories
 2. **[battle-card-creator](general_skills/battle-card-creator/)** - Automate competitive battle card creation with research guidelines and templates
 
+### Git Skills (Plugin Marketplace)
+
+The `git_skills/` directory is a **local plugin marketplace** that can be added to Claude Code:
+
+```bash
+# Add marketplace
+claude plugin marketplace add /path/to/custom-claude-skills/git_skills
+
+# Install plugins
+claude plugin install git-worktree@custom-git-skills
+```
+
+1. **[git-worktree](git_skills/git-worktree/)** - Manage git worktrees with smart automation (create with auto-setup, list with merge status, clean up stale worktrees)
+   - `/git-worktree:worktree-add` - Create worktree with auto-setup
+   - `/git-worktree:worktree-list` - List worktrees with merge status
+   - `/git-worktree:worktree-clean` - Remove merged worktrees
+
 ## Repository Structure
 
 ```
@@ -50,6 +69,8 @@ custom-claude-skills/
 ├── develop_planning_skills/       # 2 Planning & visualization skills
 ├── project-skills/                # 1 Project bootstrapping skill
 ├── general_skills/                # 2 General-purpose skills
+├── git_skills/                    # Plugin marketplace (git-worktree)
+├── SKILLS_VS_PLUGINS.md           # Guide: when to use skills vs plugins
 └── README.md
 ```
 
@@ -131,7 +152,7 @@ Apache-2.0
 
 ## Version
 
-**v1.3.0** - January 2026
+**v1.3.1** - January 2026
 
 ### Recent Updates
 
@@ -141,7 +162,12 @@ Apache-2.0
 - 🔧 **Renamed langgraph-mcp-tool-calling-agent** to **langgraph-mcp-tool**: Focused on tool creation from MCP servers
 - 🔧 **Renamed langgraph-unstructured-tool-agent** to **langgraph-structured-unstructured-tool**: Combined Vector Search and Genie tools
 - 📝 **Added CLAUDE.md**: Project guidance for Claude Code instances
-- Total skills: 15 → 14 (consolidated and streamlined)
+- Total skills: 15 (consolidated and streamlined)
+
+**v1.3.1** (January 2026):
+- ✨ **Added git-worktree skill**: Manage git worktrees with auto-setup, merge status, and cleanup commands
+- 📝 **Added SKILLS_VS_PLUGINS.md**: Guide for deciding when to convert skills to plugins
+- 🔌 **Plugin format example**: git-worktree demonstrates plugin structure with multiple commands
 
 **v1.2.1** (December 2025):
 - Fixed mermaid-diagrams-creator: Made image generation mandatory
