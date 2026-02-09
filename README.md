@@ -6,8 +6,6 @@ A curated collection of specialized skills for Claude Code to enhance productivi
 
 This repository contains 15 custom skills organized by domain. Each skill provides specialized knowledge, workflows, and tool integrations. See individual skill directories for detailed documentation.
 
-For guidance on converting skills to plugins, see [SKILLS_VS_PLUGINS.md](SKILLS_VS_PLUGINS.md).
-
 ## Available Skills
 
 ### Databricks Agent Development Skills (5)
@@ -25,8 +23,8 @@ For guidance on converting skills to plugins, see [SKILLS_VS_PLUGINS.md](SKILLS_
 
 ### Python Skills (2)
 
-1. **[pytest-test-creator](python_sklls/pytest-test-creator/)** - Auto-generate comprehensive unit tests using pytest, coverage, and uv
-2. **[python-code-formatter](python_sklls/python-code-formatter/)** - Format Python code with intelligent tool selection (blackbricks for Databricks, black+isort for regular Python)
+1. **[pytest-test-creator](python_skills/pytest-test-creator/)** - Auto-generate comprehensive unit tests using pytest, coverage, and uv
+2. **[python-code-formatter](python_skills/python-code-formatter/)** - Format Python code with intelligent tool selection (blackbricks for Databricks, black+isort for regular Python)
 
 ### Planning & Visualization Skills (2)
 
@@ -65,30 +63,29 @@ claude plugin install git-worktree@custom-git-skills
 custom-claude-skills/
 ├── databricks_agent_dev_skills/   # 5 Agent development skills
 ├── databricks_platform_skills/    # 2 Databricks platform skills
-├── python_sklls/                  # 2 Python development skills
+├── python_skills/                 # 2 Python development skills
 ├── develop_planning_skills/       # 2 Planning & visualization skills
 ├── project-skills/                # 1 Project bootstrapping skill
 ├── general_skills/                # 2 General-purpose skills
 ├── git_skills/                    # Plugin marketplace (git-worktree)
-├── SKILLS_VS_PLUGINS.md           # Guide: when to use skills vs plugins
 └── README.md
 ```
 
 ## Installation
 
-Each skill is self-contained in its own directory with detailed documentation:
+Each skill is self-contained in its own directory:
 
 1. Navigate to the specific skill directory
-2. Follow the installation instructions in the skill's README.md
+2. Read the SKILL.md for usage instructions
 3. Upload the skill package to Claude Code as needed
 
 ## Documentation
 
-Each skill includes comprehensive documentation in its directory:
-- **README.md** - Overview and quick start
-- **SKILL.md** - Main skill instructions for Claude
-- **QUICK_REFERENCE.md** - Command reference card (where applicable)
-- **Reference guides** - Detailed technical documentation
+Each skill includes:
+- **SKILL.md** - Main skill instructions with frontmatter metadata
+- **references/** - Detailed technical documentation (loaded on demand)
+- **scripts/** - Utility scripts (where applicable)
+- **templates/** - Code templates (where applicable)
 
 ## Quick Start Examples
 
@@ -144,7 +141,7 @@ cross-platform-skill → (generate Codex/Gemini compatible instructions)
 
 - Claude Code CLI
 - Git for version control
-- Skill-specific requirements (see individual skill READMEs)
+- Skill-specific requirements (see individual SKILL.md files)
 
 ## License
 
@@ -152,9 +149,16 @@ Apache-2.0
 
 ## Version
 
-**v1.3.1** - January 2026
+**v1.4.0** - February 2026
 
 ### Recent Updates
+
+**v1.4.0** (February 2026):
+- 🔧 **Trimmed oversized skills**: Reduced 5 skills exceeding 500 lines using progressive disclosure (extract to `references/`)
+- 🗑️ **Removed redundant files**: Deleted README.md, QUICK_REFERENCE.md, and other auxiliary docs from all skills
+- ✏️ **Improved frontmatter descriptions**: Added trigger context to databricks-agent-app-builder and langgraph-mcp-tool
+- 📁 **Fixed directory typo**: Renamed `python_sklls/` to `python_skills/`
+- 📝 **Updated CLAUDE.md**: Added skill best practices section, aligned with new structure
 
 **v1.3.0** (January 2026):
 - 🔄 **Reorganized skill structure**: Consolidated agent development skills into `databricks_agent_dev_skills/` directory
@@ -166,7 +170,6 @@ Apache-2.0
 
 **v1.3.1** (January 2026):
 - ✨ **Added git-worktree skill**: Manage git worktrees with auto-setup, merge status, and cleanup commands
-- 📝 **Added SKILLS_VS_PLUGINS.md**: Guide for deciding when to convert skills to plugins
 - 🔌 **Plugin format example**: git-worktree demonstrates plugin structure with multiple commands
 
 **v1.2.1** (December 2025):
