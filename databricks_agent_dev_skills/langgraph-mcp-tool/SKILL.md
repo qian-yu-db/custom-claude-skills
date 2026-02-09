@@ -1,6 +1,6 @@
 ---
 name: langgraph-mcp-tool
-description: Create LangChain-compatible tools from Databricks MCP servers (managed and external) for use in any AI agent framework.
+description: Create LangChain-compatible tools from Databricks MCP servers (managed and external) for use in any AI agent framework. Use when connecting to Databricks managed MCP (Vector Search, Genie, UC Functions, DBSQL), integrating external MCP servers, or creating tools from Unity Catalog functions for LangGraph/LangChain agents.
 ---
 
 # LangGraph MCP Tool Skill
