@@ -1,14 +1,6 @@
 ---
 name: langgraph-structured-unstructured-tool
-description: Set up Databricks retrieval tools for AI agents using VectorSearchRetrieverTool (unstructured/RAG) and GenieAgent (structured/SQL). Tool configuration only - no agent implementation.
-triggers:
-  - "Set up Vector Search retrieval tool"
-  - "Create Genie tool for my agent"
-  - "Configure unstructured retrieval"
-  - "Set up structured data tool"
-  - "Add retrieval tools to my agent"
-  - "Configure RAG tool"
-  - "Set up SQL query tool"
+description: Set up Databricks retrieval tools for AI agents using VectorSearchRetrieverTool (unstructured/RAG) and GenieAgent (structured/SQL). Tool configuration only - no agent implementation. Use when setting up Vector Search retrieval tools, creating Genie tools, configuring unstructured/RAG retrieval, setting up structured data tools, adding retrieval tools to agents, or configuring SQL query tools.
 ---
 
 # LangGraph Structured & Unstructured Tool Skill

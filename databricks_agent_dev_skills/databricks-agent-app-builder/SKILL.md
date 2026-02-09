@@ -1,9 +1,6 @@
 ---
 name: databricks-agent-app-builder
-description: Generate complete Databricks App projects with MLflow agent server for LangGraph, OpenAI Agents SDK, or non-conversational agents
-version: 1.0.0
-author: Custom Skills
-tags: [databricks, mlflow, agent, langgraph, openai, fastapi, databricks-apps]
+description: Generate complete Databricks App projects with MLflow agent server for LangGraph, OpenAI Agents SDK, or non-conversational agents. Use when creating new AI agent applications for Databricks Apps, building conversational or stateless API agents, setting up MLflow tracing for agent observability, or deploying agents to Databricks workspace.
 ---
 
 # Databricks Agent App Builder

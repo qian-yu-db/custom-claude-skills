@@ -1,9 +1,6 @@
 ---
 name: git-worktree
 description: Manage git worktrees with smart automation. Create worktrees with auto-setup (dependencies, env files), list worktrees with merge status, clean up stale worktrees, and switch between worktrees. Use when working on multiple branches simultaneously, doing quick bug fixes, or reviewing PRs without stashing.
-version: 1.0.0
-author: Custom Skills
-tags: [git, worktree, workflow, branches, parallel-development]
 ---
 
 # Git Worktree Skill

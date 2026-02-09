@@ -12,26 +12,31 @@ Every skill follows this standardized structure:
 ```
 skill-name/
 ├── SKILL.md              # Main instructions with YAML frontmatter (required)
-├── README.md             # Overview and quick start (required)
-├── QUICK_REFERENCE.md    # Command reference card (optional)
-├── references/           # Technical deep-dives (optional)
+├── references/           # Technical deep-dives, loaded on demand (optional)
 ├── scripts/              # Generation/utility scripts (optional)
 ├── templates/            # Code templates (optional)
-└── examples/             # Usage examples (optional)
+├── examples/             # Usage examples (optional)
+└── assets/               # Files used in output (optional)
 ```
 
 ### YAML Frontmatter Format
 
-All SKILL.md files must include this frontmatter:
+All SKILL.md files must include this frontmatter with only `name` and `description`:
 ```yaml
 ---
 name: skill-name
-description: Detailed description for discovery
-version: 1.0.0
-author: Custom Skills
-tags: [tag1, tag2, ...]
+description: What the skill does AND when to use it (triggers). This is the primary discovery mechanism.
 ---
 ```
+
+The `description` field serves as the triggering mechanism — include both what the skill does and specific use cases/contexts for when to activate it.
+
+### Skill Best Practices
+
+- **Body under 500 lines**: Keep SKILL.md concise. Extract large code blocks and reference material to `references/` files.
+- **Progressive disclosure**: Only the description is always loaded. The body loads when triggered. References load on demand.
+- **Don't explain what Claude knows**: Only include information Claude doesn't already have (Databricks-specific patterns, project-specific configs, etc.).
+- **No extra documentation files**: Do not create README.md, QUICK_REFERENCE.md, CHANGELOG.md, etc. in skill directories.
 
 ## Development Guidelines
 
@@ -39,17 +44,17 @@ tags: [tag1, tag2, ...]
 - **pyproject.toml**: Keep minimal unless project-specific requirements dictate otherwise
 - **Error handling**: Do not add excessive try-except blocks
 - **Skills are self-contained**: Each skill should be independently usable without dependencies on other skills
-- **Documentation pattern**: Include clear "When to Use This Skill" sections in SKILL.md
 
 ## Directory Organization
 
 ```
 databricks_agent_dev_skills/   # Agent development (app builder, deploy, MCP, supervisor, retrieval tools)
 databricks_platform_skills/    # DAB, notebooks
-python_sklls/                  # pytest, formatters
+python_skills/                 # pytest, formatters
 develop_planning_skills/       # Mermaid, cross-platform
 project-skills/                # Project bootstrapping
 general_skills/                # Jira, battle cards
+git_skills/                    # Git worktree (plugin format)
 ```
 
 ## Common Commands in Generated Projects
